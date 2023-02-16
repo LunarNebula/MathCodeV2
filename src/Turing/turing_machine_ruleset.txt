@@ -1,0 +1,23 @@
+FORMAT:
+State list (length 'm'), separated by spaces
+Cell input list (length 'n'), separated by spaces
+The following in an mXn grid, with indices I<m and J<n {
+    (for State I, on cell with cellState J)
+    -The next state
+    -The new cell value
+    -The direction of movement (L,R,H)
+}
+Initial state " " default cell value
+
+NOTES:
+Separate values in each element in the grid above with dashes.
+
+EXAMPLE (5 states, 2 cell values):
+A B C D E           <- 5 states
+0 1                 <- 2 cell conditions
+B-1-R C-1-L         <- 5x2 table grouping next state, new cell value, new movement direction
+C-1-R B-1-R
+D-1-R E-0-L
+A-1-L D-1-L
+E-1-H A-0-L
+A 0                 <- Initial conditions (initial state, default cell value)

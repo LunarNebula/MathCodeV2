@@ -1,0 +1,13 @@
+5
+2
+2 1
+1 1 1
+0 1 0 0
+^
+// The element indicated by the carat is arbitrary; all other elements must remain as they are.
+
+5
+2
+2 0
+1 1 1
+0 1 0 0

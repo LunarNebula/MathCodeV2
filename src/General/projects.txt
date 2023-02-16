@@ -1,0 +1,20 @@
+The following are items for future work in this Java project.
+-------------
+ALGORITHMS TO FIX:
+*Boolean operators in BST.java to improve time complexity from n^2 to n and reduce average-case space complexity
+    *AND     complete
+    *OR      complete
+    *XOR     complete
+    *AND_NOT incomplete
+*Tree functions in Combinatorics.java that are inoperable
+*Permutations.java (everything) - computation cycle algorithm doesn't work
+-------------
+CLASSES/PACKAGES/CONCEPTS TO FINISH:
+*Physics package
+*Run 10/11 undetermined Busy Beaver candidates?
+*Finish PermutationTest with updated indexing and run against Permutation
+*Finish RadixTest and run against Radix/BigInteger
+-------------
+PROJECTS/CONCEPTS TO START:
+???
+-------------
