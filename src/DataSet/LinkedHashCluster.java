@@ -119,6 +119,22 @@ public class LinkedHashCluster<Value> implements Iterable<Value> {
     }
 
     /**
+     * Removes a {@code Value} from its chain in this {@code LinkedHashCluster} and creates a new
+     * chain with only that value. If the value does not exist in this {@code LinkedHashCluster},
+     * then the item is not added and no new chain is created.
+     * @param a the target {@code Value}.
+     * @return {@code true} if the provided {@code Value} was successfully extracted, else
+     * {@code false}.
+     */
+    public boolean extract(Value a) {
+        boolean extracted = remove(a);
+        if(extracted) {
+            add(a);
+        }
+        return extracted;
+    }
+
+    /**
      * Finds the number of HashChains in this LinkedHashCluster
      * @return this.numberOfChains
      */
