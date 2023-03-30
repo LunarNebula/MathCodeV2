@@ -3,7 +3,6 @@ package Algebra;
 import Exception.*;
 import Exception.ExceptionMessage.TargetedMessage;
 import General.TrueTextEncodable;
-import Geometry.Point2D;
 import Geometry.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -119,9 +118,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if the addend Matrix is incompatible for addition
      */
     public Matrix add(Matrix addend) throws IllegalDimensionException {
-        if(dimensionsIllegalForAddition(addend)) {
-            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_MATRIX_DIMENSION);
-        }
+        verifyAdditionDimensions(addend);
         final Matrix sum = new Matrix(this.e);
         for(int i = 0; i < sum.e.length; i++) {
             for(int j = 0; j < this.e[i].length; j++) {
@@ -138,9 +135,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if the subtrahend Matrix is incompatible for subtraction
      */
     public Matrix subtract(Matrix subtrahend) throws IllegalDimensionException {
-        if(dimensionsIllegalForAddition(subtrahend)) {
-            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_MATRIX_DIMENSION);
-        }
+        verifyAdditionDimensions(subtrahend);
         final Matrix sum = new Matrix(this.e);
         for(int i = 0; i < sum.e.length; i++) {
             for(int j = 0; j < this.e[i].length; j++) {
@@ -173,9 +168,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if the multiplicand Matrix is incompatible for dot-product multiplication
      */
     public Matrix multiply(Matrix multiplicand) throws IllegalDimensionException {
-        if(dimensionsIllegalForMultiplication(multiplicand)) {
-            throw new IllegalDimensionException(IllegalDimensionException.MATRIX_DOT_PRODUCT_ILLEGAL);
-        }
+        verifyMultiplicationDimensions(multiplicand);
         final Matrix product = new Matrix(this.e.length, multiplicand.e.length > 0 ? multiplicand.e[0].length : 0);
         for(int i = 0; i < product.e.length; i++) {
             for(int j = 0; j < product.e[i].length; j++) {
@@ -196,9 +189,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not square
      */
     public Matrix pow(int pow) throws IllegalDimensionException {
-        if(isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        verifySquareMatrix();
         Matrix antilogarithm = identityMatrix(this.e.length);
         int powTest = Math.abs(pow);
         List<Boolean> powers = new LinkedList<>();
@@ -240,9 +231,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not rectangular
      */
     public Matrix rowEchelon() throws IllegalDimensionException {
-        if(isNonRectangular()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
-        }
+        verifyRectangularMatrix();
         final Matrix rowEchelon = new Matrix(this.e);
         int row = 0;
         for(int i = 0; i < rowEchelon.e[0].length && row < rowEchelon.e.length; i++) {
@@ -306,9 +295,8 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalArgumentException if the target Matrix cannot be properly appended to this Matrix or this Matrix is not rectangular
      */
     public Matrix[] reducedRowEchelon(Matrix m) throws IllegalArgumentException {
-        if(isNonRectangular()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
-        } else if(this.e.length != m.e.length) {
+        verifyRectangularMatrix();
+        if(this.e.length != m.e.length) {
             throw new IllegalArgumentException();
         }
         final Matrix rowEchelon = new Matrix(this.e), inversion = new Matrix(m.e);
@@ -369,9 +357,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not square
      */
     public Matrix inverse() throws IllegalDimensionException {
-        if(isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        verifySquareMatrix();
         return reducedRowEchelon(identityMatrix(this.e.length))[1];
     }
 
@@ -397,9 +383,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not square
      */
     public Polynomial characteristicPolynomial() throws IllegalDimensionException {
-        if(isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        verifySquareMatrix();
         final RationalFunction X = new RationalFunction(new Polynomial(0, 1));
         final RationalFunction[][] elements = new RationalFunction[this.e.length][];
         for(int i = 0; i < elements.length; i++) {
@@ -439,9 +423,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not rectangular
      */
     public Matrix[] LU_decomposition() {
-        if(isNonRectangular()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
-        }
+        verifyRectangularMatrix();
         final Fraction[][] LU = new Fraction[this.e.length][];
         for(int i = 0; i < LU.length; i++) {
             LU[i] = new Fraction[this.e[i].length];
@@ -480,9 +462,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not rectangular
      */
     public Matrix[] LDU_decomposition() {
-        if(isNonRectangular()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
-        }
+        verifyRectangularMatrix();
         final Fraction[][] LDU = new Fraction[this.e.length][];
         for(int i = 0; i < LDU.length; i++) {
              LDU[i] = new Fraction[this.e[i].length];
@@ -528,9 +508,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is not square
      */
     public Fraction determinant() {
-        if(isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        verifySquareMatrix();
         final Matrix rowEchelon = new Matrix(this.e);
         Fraction determinant = Fraction.ONE;
         int row = 0;
@@ -614,9 +592,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if this Matrix is non-rectangular
      */
     public Matrix transpose() throws IllegalDimensionException {
-        if(isNonRectangular()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
-        }
+        verifyRectangularMatrix();
         final Matrix transpose = new Matrix(this.e.length > 0 ? this.e[0].length : 0, this.e.length);
         for(int i = 0; i < this.e.length; i++) {
             for(int j = 0; j < this.e[i].length; j++) {
@@ -627,6 +603,20 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
+     * Finds the null space of this {@code Matrix}.
+     * @return an array of {@code Vectors} forming a basis for this {@code Matrix}.
+     */
+    public List<Vector> nullSpace() {
+        Matrix reducedRowEchelon = reducedRowEchelon();
+        return null;
+    }
+
+    public List<Vector> getColumns() {
+        //List<Vector>
+        return null;
+    }
+
+    /**
      * Finds the Schur product of two Matrices
      * @param multiplicand the multiplicand Matrix
      * @return the Matrix where each element is the product of the corresponding elements in
@@ -634,9 +624,7 @@ public class Matrix implements TrueTextEncodable {
      * @throws IllegalDimensionException if the dimensions of the multiplicand Matrix are incompatible for Schur multiplication
      */
     public Matrix schurProduct(Matrix multiplicand) throws IllegalDimensionException {
-        if(dimensionsIllegalForAddition(multiplicand)) {
-            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_MATRIX_DIMENSION);
-        }
+        verifyAdditionDimensions(multiplicand);
         final Matrix product = new Matrix(this.e);
         for(int i = 0; i < product.e.length; i++) {
             for(int j = 0; j < product.e[i].length; j++) {
@@ -727,14 +715,36 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
+     * Gets the column size for a specified row in this {@code Matrix}.
+     * @param row the row index.
+     * @return the column size.
+     */
+    public int columnSize(int row) {
+        return this.e[row].length; //TODO: fix for index error
+    }
+
+    /**
+     * Finds the maximum column size across this {@code Matrix}.
+     * @return {@code -1} if there are no rows in this {@code Matrix}, else the
+     * number of columns in the longest row.
+     */
+    public int maxColumnSize() {
+        int columnSize = -1;
+        for(Fraction[] row : this.e) {
+            if(row.length > columnSize) {
+                columnSize = row.length;
+            }
+        }
+        return columnSize;
+    }
+
+    /**
      * Finds the minimal Polynomial of this Matrix
      * @return the Polynomial f of least degree such that f(m) = [0]
      * @throws IllegalDimensionException if this Matrix is non-square
      */
     public Polynomial minimalPolynomial() {
-        if(isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        verifySquareMatrix();
         final Fraction[][] elements = new Fraction[this.e.length][];
         for(int i = 0; i < elements.length; i++) {
             elements[i] = new Fraction[]{Fraction.ZERO};
@@ -782,67 +792,123 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Checks if two Matrices cannot be added
-     * @param addend the addend Matrix
-     * @return true if the row and column lengths do not match between this Matrix and the comparator, else false
+     * Determines whether a linear system is conditionally consistent.
+     * @param constant the constant {@code Matrix}.
+     * @return {@code true} if the algorithm does not detect an inconsistent system, else
+     * {@code false} if the system can be declared inconsistent. Note that this algorithm
+     * assumes that a sufficient set of row operations has already been performed on the
+     * {@code Matrix} to reveal an inconsistency by way of a row of zeros in the coefficient
+     * {@code Matrix} and a nonzero constant in the same row in the constant {@code Matrix}.
+     * @throws IllegalDimensionException if the coefficient and constant {@code Matrices}
+     * have different row dimensions.
      */
-    public boolean dimensionsIllegalForAddition(Matrix addend) {
-        if(this.e.length == addend.e.length) {
-            for(int i = 0; i < this.e.length; i++) {
-                if(this.e[i].length != addend.e[i].length) {
-                    return true;
+    public boolean isConditionallyConsistent(Matrix constant) {
+        if(this.e.length != constant.e.length) {
+            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_VECTOR_DIMENSION);
+        }
+        for(int i = 0; i < constant.e.length; i++) {
+            if(! constant.e[i][0].equals(Fraction.ZERO)) {
+                boolean failedConsistencyCheck = true;
+                final int length = this.e[i].length;
+                for(int j = 0; j < length; j++) {
+                    if(! this.e[i][j].equals(Fraction.ZERO)) {
+                        failedConsistencyCheck = false;
+                        j = length;
+                    }
+                }
+                if(failedConsistencyCheck) {
+                    return false;
                 }
             }
-            return false;
-        } else {
-            return true;
+        }
+        return true;
+    }
+
+    /**
+     * Determines whether this {@code Matrix} is the zero matrix.
+     * @return {@code true} if all elements of this {@code Matrix} are zero, else
+     * {@code false} if at least one element is nonzero.
+     */
+    public boolean isZero() {
+        for(Fraction[] row : this.e) {
+            for(Fraction element : row) {
+                if(! element.equals(Fraction.ZERO)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Verifies that a given row and column is within the bounds of this {@code Matrix}.
+     * @param row the row index.
+     * @param column the column index.
+     * @throws IllegalDimensionException if either the row or column index forces
+     * access of an element that does not exist in this {@code Matrix}. This may
+     * be due to a negative input index or one that extends outside the range of indices.
+     */
+    private void verifyRowIndexValidity(int row, int column) throws IllegalDimensionException {
+        if(row < 0 | row >= rowSize() | column < 0 | column >= columnSize(row)) {
+            throw new IllegalDimensionException(IllegalDimensionException.MATRIX_ELEMENT_OUT_OF_BOUNDS);
+        }
+    }
+
+    /**
+     * Checks if two {@code Matrices} cannot be added.
+     * @param addend the addend Matrix
+     * @return {@code true} if the row and column lengths do not match between this
+     * {@code Matrix} and the comparator, else {@code false}.
+     */
+    private void verifyAdditionDimensions(Matrix addend) {
+        if(this.e.length != addend.e.length) {
+            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_MATRIX_DIMENSION);
+        }
+        for(int i = 0; i < this.e.length; i++) {
+            if(this.e[i].length != addend.e[i].length) {
+                throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_MATRIX_DIMENSION);
+            }
         }
     }
 
     /**
      * Checks if two Matrices cannot be multiplied
      * @param multiplicand the multiplicand Matrix
-     * @return true if at least one Matrix is not rectangular or the number of columns in this Matrix
-     * is not equal to the number of rows in the comparator, else false
+     * TODO: include exception thrown
      */
-    public boolean dimensionsIllegalForMultiplication(Matrix multiplicand) {
-        if(isNonRectangular() || multiplicand.isNonRectangular()) {
-            return true;
-        } else if(this.e.length == 0) {
-            return false;
-        } else {
-            return ! (this.e[0].length == multiplicand.e.length);
+    private void verifyMultiplicationDimensions(Matrix multiplicand) {
+        verifyRectangularMatrix();
+        multiplicand.verifyRectangularMatrix();
+        if((this.e.length > 0 & this.e[0].length != multiplicand.e.length)) {
+            throw new IllegalDimensionException(IllegalDimensionException.MATRIX_DOT_PRODUCT_ILLEGAL);
         }
     }
 
     /**
      * Checks if this Matrix is not rectangular
-     * @return true if not all rows have the same length, else false
+     * TODO: include exception thrown
      */
-    public boolean isNonRectangular() {
-        if(this.e.length == 0) {
-            return false;
-        }
-        int length = this.e[0].length;
-        for(Fraction[] row : this.e) {
-            if(row.length != length) {
-                return true;
+    public void verifyRectangularMatrix() {
+        if(this.e.length != 0) {
+            int length = this.e[0].length;
+            for(Fraction[] row : this.e) {
+                if(row.length != length) {
+                    throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
+                }
             }
         }
-        return false;
     }
 
     /**
      * Checks if this Matrix is not square
-     * @return true if any row length does not equal a column length, else false
+     * TODO: include exception thrown
      */
-    public boolean isNonSquare() {
+    public void verifySquareMatrix() {
         for(Fraction[] row : this.e) {
             if(row.length != this.e.length) {
-                return true;
+                throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
             }
         }
-        return false;
     }
 
     /**
@@ -994,7 +1060,7 @@ public class Matrix implements TrueTextEncodable {
      */
     public static Matrix[] getSystem(LinearEquation... equations) {
         Fraction[][] coefficient = new Fraction[equations.length][], constant = new Fraction[equations.length][];
-        for(int i = 0; i < equations.length; i++) {
+        for (int i = 0; i < equations.length; i++) {
             coefficient[i] = Fraction.valueOf(equations[i].getCoefficients());
             constant[i] = new Fraction[]{new Fraction(equations[i].getConstant())};
         }
@@ -1007,25 +1073,11 @@ public class Matrix implements TrueTextEncodable {
      * @param constant the constant {@code Matrix}.
      * @throws NoRealSolutionException if there exists at least one row for which the constant
      * {@code Matrix} element is nonzero and all coefficient {@code Matrix} elements are zero.
+     * Directly references the {@code isConditionallyConsistent()} method.
      */
     public static void verifyConditionalConsistency(Matrix coefficient, Matrix constant) throws NoRealSolutionException {
-        if(coefficient.e.length != constant.e.length) {
-            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_VECTOR_DIMENSION);
-        }
-        for(int i = 0; i < constant.e.length; i++) {
-            if(! constant.e[i][0].equals(Fraction.ZERO)) {
-                boolean failedConsistencyCheck = true;
-                final int length = coefficient.e[i].length;
-                for(int j = 0; j < length; j++) {
-                    if(! coefficient.e[i][j].equals(Fraction.ZERO)) {
-                        failedConsistencyCheck = false;
-                        j = length;
-                    }
-                }
-                if(failedConsistencyCheck) {
-                    throw new NoRealSolutionException(NoRealSolutionException.INCONSISTENT_SYSTEM_OF_EQUATIONS);
-                }
-            }
+        if(! coefficient.isConditionallyConsistent(constant)) {
+            throw new NoRealSolutionException(NoRealSolutionException.INCONSISTENT_SYSTEM_OF_EQUATIONS);
         }
     }
 

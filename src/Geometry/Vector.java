@@ -60,6 +60,20 @@ public class Vector {
     }
 
     /**
+     * Creates a new {@code Vector} from the elements in a specified row of a {@code Matrix}.
+     * @param m the target {@code Matrix}.
+     * @param row the index of the row.
+     * @throws IllegalDimensionException if the row provided is outside the legal range for
+     * the given {@code Matrix}.
+     */
+    public Vector(Matrix m, int row) throws IllegalDimensionException {
+        if(row < 0 | row >= m.rowSize()) {
+            throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_VECTOR_DIMENSION);
+        }
+        //
+    }
+
+    /**
      * Creates a new Vector with given dimensions
      * @param s the dimensions in String format
      */
@@ -165,6 +179,20 @@ public class Vector {
     }
 
     /**
+     * Determines whether this {@code Vector} is the zeor vector.
+     * @return {@code true} if all elements of this {@code Vector} are zero, else {@code false}
+     * if at least one element is nonzero.
+     */
+    public boolean isNull() {
+        for(Fraction coordinate : this.coordinates) {
+            if(! coordinate.equals(Fraction.ZERO)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Retrieves the value of this Vector
      * @return the coordinates
      */
@@ -187,10 +215,9 @@ public class Vector {
      */
     @Override
     public boolean equals(Object o) {
-        if(! (o instanceof Vector)) {
+        if(! (o instanceof final Vector comparator)) {
             return false;
         }
-        final Vector comparator = (Vector) o;
         if(this.coordinates.length == comparator.coordinates.length) {
             return false;
         }

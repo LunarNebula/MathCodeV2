@@ -262,9 +262,7 @@ public class Polynomial implements Comparable<Polynomial>, TrueTextEncodable {
      * @return <code>f(x)</code>
      */
     public Matrix evaluate(Matrix x) {
-        if(x.isNonSquare()) {
-            throw new IllegalDimensionException(IllegalDimensionException.NON_SQUARE_MATRIX);
-        }
+        x.verifySquareMatrix();
         final Matrix I = Matrix.identityMatrix(x.rowSize());
         Matrix y = new Matrix(x.rowSize());
         for(int i = this.terms.length - 1; i >= 0; i--) {

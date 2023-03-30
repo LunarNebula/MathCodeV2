@@ -2,6 +2,10 @@ package DataKey;
 
 import General.TrueTextEncodable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * A class that can be used to denote a single value mapped to by an ordered set of
  * other values.
@@ -11,7 +15,7 @@ public class Coordinate<Data> implements TrueTextEncodable {
     //Stores a list of coordinates
     private final Data[] coordinates;
     //Stores the associated coordinate hashCodes
-    private final int[] hashCodes;
+    private final int hashCode;
 
     /**
      * Creates a new Coordinate
@@ -20,33 +24,20 @@ public class Coordinate<Data> implements TrueTextEncodable {
     @SafeVarargs
     public Coordinate(Data... coordinates) {
         this.coordinates = coordinates;
-        this.hashCodes = new int[this.coordinates.length];
-        for(int i = 0; i < this.hashCodes.length; i++) {
-            this.hashCodes[i] = this.coordinates[i].hashCode();
+        final List<Integer> hashCodes = new ArrayList<>();
+        for(Data c : coordinates) {
+            hashCodes.add(c.hashCode());
         }
+        this.hashCode = Objects.hash(hashCodes);
     }
 
     /**
-     * Finds the hashCode of this Coordinate
-     * @return the unique int value representing an encoding of this Coordinate
+     * Finds the hashCode of this {@code Coordinate}.
+     * @return {@code this.hashCode}
      */
     @Override
     public int hashCode() {
-        int code = 0;
-        for(int i = 0; i < this.hashCodes.length; i++) {
-            int partialSum = 0, product = 1;
-            for(int j = 0; j <= i; j++) {
-                partialSum += this.hashCodes[j];
-            }
-            final int LIMIT = i + 1;
-            for(int j = 1; j <= LIMIT; j++) {
-                product *= partialSum;
-                product /= j;
-                partialSum++;
-            }
-            code += product;
-        }
-        return code;
+        return this.hashCode;
     }
 
     /**

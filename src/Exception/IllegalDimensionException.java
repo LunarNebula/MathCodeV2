@@ -1,8 +1,8 @@
 package Exception;
 
 /**
- * This Exception is called when a program attempts to compare Objects with dimensional bounds that do not permit the
- * requested operation.
+ * This {@code Exception} is called when a program attempts to compare {@code Objects}
+ * with dimensional bounds that do not permit the requested operation.
  */
 public class IllegalDimensionException extends IllegalArgumentException {
     public static String UNEQUAL_VECTOR_DIMENSION =
@@ -11,6 +11,8 @@ public class IllegalDimensionException extends IllegalArgumentException {
             "Element-wise computations cannot be performed on matrices with the given dimensions.";
     public static String MATRIX_DOT_PRODUCT_ILLEGAL =
             "Dot-product computations cannot be performed on matrices with the given dimensions.";
+    public static String MATRIX_ELEMENT_OUT_OF_BOUNDS =
+            "The requested index requires access to an element not within the bounds of this Matrix.";
     public static String NON_RECTANGULAR_MATRIX =
             "This operation cannot be completed on a non-rectangular matrix.";
     public static String NON_SQUARE_MATRIX =
