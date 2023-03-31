@@ -8,10 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Stores an object that simulates a Turing Machine. The object is initialized with
- * a new
- * @param <Label>
- * @param <Cell>
+ * Stores an object that simulates a Turing Machine.
+ * @param <Label> the data type for each state ID.
+ * @param <Cell> the data type stored in each tape
  */
 public class Machine<Label, Cell> {
     private LinkedChain<Cell>[] tapes;
