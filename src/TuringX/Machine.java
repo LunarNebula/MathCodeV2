@@ -78,7 +78,7 @@ public class Machine<Label, Cell> {
             if(stateShift == null) {
                 this.isRunning = false;
             } else {
-                this.currentState = stateShift.nextState().getID();
+                this.currentState = stateShift.nextState();
                 for(int i = 0; i < values.length; i++) {
                     TapeShift<Cell> tapeShift = stateShift.getShift(i);
                     this.tapes[i].set(tapeShift.tapeValue());

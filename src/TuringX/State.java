@@ -77,40 +77,10 @@ public class State<Label, Cell> {
         if(!(o instanceof State<?,?> state)) {
             return false;
         }
-        Stack<State<Label, Cell>> thisStack = new Stack<>();
-        HashSet<Label> visitedSet = new HashSet<>();
-        Stack<State<?,?>> stateStack = new Stack<>();
-        thisStack.push(this);
-        stateStack.push(state);
-        while(! thisStack.isEmpty()) {
-            State<Label, Cell> thisCursor = thisStack.pop();
-            State<?,?> stateCursor = stateStack.pop();
-            if(thisCursor.ID != stateCursor.ID
-            | thisCursor.tapes != stateCursor.tapes
-            | thisCursor.map.size() != stateCursor.map.size()) {
+        for(MultiKey<Cell> key : this.map.keySet()) {
+            StateShift<?,?> stateShift = state.map.get(key);
+            if(stateShift == null || ! this.map.get(key).equals(stateShift)) {
                 return false;
-            }
-            for(MultiKey<Cell> key : thisCursor.map.keySet()) {
-                StateShift<Label, Cell> thisShift = thisCursor.map.get(key);
-                StateShift<?,?> stateShift = stateCursor.map.get(key);
-                if(stateShift == null || thisShift.size() != stateShift.size()) {
-                    return false;
-                }
-                for(int i = 0; i < thisShift.size(); i++) {
-                    TapeShift<Cell> thisTapeShift = thisShift.getShift(i);
-                    TapeShift<?> stateTapeShift = stateShift.getShift(i);
-                    if(! (thisTapeShift.tapeValue().equals(stateTapeShift.tapeValue())
-                    && thisTapeShift.movement() == stateTapeShift.movement())) {
-                        return false;
-                    }
-                }
-                State<Label, Cell> thisState = thisShift.nextState();
-                State<?,?> stateState = stateShift.nextState();
-                if(! visitedSet.contains(thisState.ID)) {
-                    thisStack.push(thisState);
-                    stateStack.push(stateState);
-                }
-                visitedSet.add(thisState.ID);
             }
         }
         return true;

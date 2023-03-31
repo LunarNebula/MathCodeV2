@@ -1,7 +1,7 @@
 package TuringX;
 
 public class StateShift<Label, Cell> {
-    private final State<Label, Cell> nextState;
+    private final Label nextState;
     private final TapeShift<Cell>[] shifts;
 
     /**
@@ -10,7 +10,7 @@ public class StateShift<Label, Cell> {
      * @param shifts the set of {@code TapeShifts} to transform the current tape state.
      */
     @SafeVarargs
-    public StateShift(State<Label, Cell> nextState, TapeShift<Cell>... shifts) {
+    public StateShift(Label nextState, TapeShift<Cell>... shifts) {
         this.nextState = nextState;
         this.shifts = shifts;
     }
@@ -19,7 +19,7 @@ public class StateShift<Label, Cell> {
      * Gets the new {@code State} implicated in this {@code StateShift}.
      * @return {@code this.nextState}
      */
-    public State<Label, Cell> nextState() {
+    public Label nextState() {
         return this.nextState;
     }
 
@@ -38,6 +38,27 @@ public class StateShift<Label, Cell> {
      */
     public int size() {
         return this.shifts.length;
+    }
+
+    /**
+     * Determines whether this {@code StateShift} is equal to another, specified {@code Object}.
+     * @param o the target {@code Object}.
+     * @return {@code true} if {@code o} is a {@code StateShift} with the same
+     * {@code TapeShift} mappings, else {@code false}.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof StateShift<?,?> stateShift)) {
+            return false;
+        } else if(! this.nextState.equals(stateShift.nextState)) {
+            return false;
+        }
+        for(int i = 0; i < this.shifts.length; i++) {
+            if(! this.shifts[i].equals(stateShift.shifts[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
