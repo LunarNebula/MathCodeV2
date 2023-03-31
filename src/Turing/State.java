@@ -7,7 +7,7 @@ import java.util.*;
 public class State<Key, Data> {
     // The ID of this State
     private final Key ID;
-    // The mapping between the current cell of the Machine LinkedChain and the Transformation to the next LinkedChain
+    // The mapping between the current cell of the Machine LinkedChain and the StateShift to the next LinkedChain
     private final Map<Data, Transformation<Key, Data>> nextStates;
 
     /**
@@ -20,17 +20,17 @@ public class State<Key, Data> {
     }
 
     /**
-     * Adds a Transformation to this State
-     * @param key the ID of the Transformation
-     * @param value the target Transformation
+     * Adds a StateShift to this State
+     * @param key the ID of the StateShift
+     * @param value the target StateShift
      */
     public void addTransformation(Data key, Transformation<Key, Data> value) {
         this.nextStates.put(key, value);
     }
 
     /**
-     * Adds all Transformation
-     * @param map the Transformation map
+     * Adds all StateShift
+     * @param map the StateShift map
      */
     public void addAllTransformations(Map<Data, Transformation<Key, Data>> map) {
         this.nextStates.putAll(map);
@@ -55,7 +55,7 @@ public class State<Key, Data> {
     /**
      * Determines whether this State is equal to a specified Object
      * @param o the comparator Object
-     * @return true if the comparator is a State with equivalent type parameters and Transformation map, else false
+     * @return true if the comparator is a State with equivalent type parameters and StateShift map, else false
      */
     @Override
     public boolean equals(Object o) {

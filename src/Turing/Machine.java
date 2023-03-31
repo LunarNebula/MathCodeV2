@@ -64,7 +64,7 @@ public class Machine<Key, Data> {
      * Determines whether this Machine is running (or whether it has halted). The machine stops if:
      * <ul>
      *      <li>It reaches a State with "STOP" as the associated Movement</li>
-     *      <li>It reaches a State with no associated Transformation</li>
+     *      <li>It reaches a State with no associated StateShift</li>
      * </ul>
      * @return this.isRunning
      */
@@ -83,7 +83,7 @@ public class Machine<Key, Data> {
     /**
      * Determines whether this Turing Machine is equal to a specified Object
      * @param o the comparator Object
-     * @return true if the comparator is a Machine with equivalent State and Transformation relations, else false
+     * @return true if the comparator is a Machine with equivalent State and StateShift relations, else false
      */
     @Override
     public boolean equals(Object o) {

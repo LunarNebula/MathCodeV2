@@ -2,7 +2,7 @@ package Turing;
 
 public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nextState, Movement movement) {
     /**
-     * Gets the new State for the current index in this Transformation
+     * Gets the new State for the current index in this StateShift
      *
      * @return this.switchState
      */
@@ -12,7 +12,7 @@ public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nex
     }
 
     /**
-     * Gets the next State in this Transformation
+     * Gets the next State in this StateShift
      *
      * @return this.nextState
      */
@@ -22,7 +22,7 @@ public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nex
     }
 
     /**
-     * Gets the Movement for this Transformation
+     * Gets the Movement for this StateShift
      *
      * @return this.movement
      */
@@ -32,10 +32,10 @@ public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nex
     }
 
     /**
-     * Determines whether this Transformation is equal to a specified Object
+     * Determines whether this StateShift is equal to a specified Object
      *
      * @param o the comparator Object
-     * @return true if the comparator is a Transformation with equal type parameters and constraints, else false
+     * @return true if the comparator is a StateShift with equal type parameters and constraints, else false
      */
     @Override
     public boolean equals(Object o) {
@@ -48,9 +48,9 @@ public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nex
     }
 
     /**
-     * Converts this Transformation to a printable format
+     * Converts this StateShift to a printable format
      *
-     * @return this Transformation as a String
+     * @return this StateShift as a String
      */
     @Override
     public String toString() {
@@ -58,7 +58,7 @@ public record Transformation<Key, Data>(Data nextTapeValue, State<Key, Data> nex
     }
 
     /**
-     * Prints this Transformation
+     * Prints this StateShift
      */
     public void print() {
         System.out.println(this);

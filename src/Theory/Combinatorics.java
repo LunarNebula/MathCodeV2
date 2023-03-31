@@ -2,7 +2,7 @@ package Theory;
 
 import Algebra.Fraction;
 import Algebra.Polynomial;
-import DataKey.Coordinate;
+import DataKey.MultiKey;
 import Exception.*;
 import General.ArrayComputer;
 
@@ -484,16 +484,16 @@ public class Combinatorics {
      *          index 0: a "weight" for the item
      *          index 1: a "value" for the item
      * @return the maximum value for a subset of the items to be chosen
-     * @throws IllegalArgumentException if the number of elements in any Coordinate is incorrect or any weight is nonpositive
+     * @throws IllegalArgumentException if the number of elements in any MultiKey is incorrect or any weight is nonpositive
      */
     @SafeVarargs
-    public static int maximumValue(int maxWeight, Coordinate<Integer>... c) {
+    public static int maximumValue(int maxWeight, MultiKey<Integer>... c) {
         if(c.length == 0) {
             return 0;
         }
         final int ARG_COUNT = 2;
-        for(Coordinate<Integer> coordinate : c) {
-            Integer[] coordinates = coordinate.getCoordinates();
+        for(MultiKey<Integer> multiKey : c) {
+            Integer[] coordinates = multiKey.getKeys();
             if(coordinates.length != ARG_COUNT) {
                 throw new IllegalArgumentException(ExceptionMessage.INCORRECT_NUMBER_OF_ARGUMENTS(ARG_COUNT));
             } else if(coordinates[0] <= 0) {
@@ -506,9 +506,9 @@ public class Combinatorics {
         }
         for(int i = 0; i < maxWeight; i++) {
             for(int j = 0; j < c.length; j++) {
-                int nextWeight = i + c[j].getCoordinates()[0];
+                int nextWeight = i + c[j].getKeys()[0];
                 if(nextWeight < table.length) {
-                    table[nextWeight][j + 1] = Math.max(table[nextWeight][j + 1], table[i][j] + c[j].getCoordinates()[1]);
+                    table[nextWeight][j + 1] = Math.max(table[nextWeight][j + 1], table[i][j] + c[j].getKeys()[1]);
                 }
             }
         }
