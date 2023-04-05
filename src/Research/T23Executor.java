@@ -27,9 +27,13 @@ public class T23Executor {
         int subgraphCounter = 0;
         while(!counter6.isZero()) {
             Tournament2S3R tournament = new Tournament2S3R(counter6);
-            boolean containsRainbowTriangles = tournament.partiallyCompress();
+            int counter = 0;
+            boolean containsRainbowTriangles = true;
+            while(counter++ < SECOND_VERTEX_COUNT& containsRainbowTriangles) {
+                containsRainbowTriangles = tournament.partiallyCompress();
+            }
             if(containsRainbowTriangles) {
-                boolean failedCheck = false;
+                boolean passedCheck = true;
                 for(int i = 0; i < SECOND_VERTEX_COUNT; i++) {
                     List<Integer> indexList = new LinkedList<>();
                     for(int j = 0; j < SECOND_VERTEX_COUNT; j++) {
@@ -39,11 +43,11 @@ public class T23Executor {
                     }
                     Tournament2S3R subgraph = tournament.subgraph(indexList);
                     if(hashCodeSet.contains(subgraph.hashCode())) {
-                        failedCheck = true;
+                        passedCheck = false;
                         i = SECOND_VERTEX_COUNT;
                     }
                 }
-                if(! failedCheck) {
+                if(passedCheck) {
                     subgraphCounter++;
                     tournament.print();
                 }

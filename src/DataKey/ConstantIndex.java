@@ -30,7 +30,7 @@ public record ConstantIndex<Data extends Comparable<Data>>(Data... indices)
      */
     @Override
     public int hashCode() {
-        return new Coordinate<>(this.indices).hashCode();
+        return new MultiKey<>(this.indices).hashCode();
     }
 
     /**

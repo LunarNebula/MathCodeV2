@@ -178,6 +178,6 @@ public class LinearEquation {
      */
     public static boolean isConsistent(LinearEquation... equations) throws IllegalDimensionException {
         final Matrix[] system = Matrix.getSystem(equations);
-        return true;
+        return system[0].isConditionallyConsistent(system[1]);
     }
 }

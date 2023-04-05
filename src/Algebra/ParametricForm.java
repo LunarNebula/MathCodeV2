@@ -35,8 +35,23 @@ public class ParametricForm {
     public ParametricForm(LinearEquation... equations) throws IllegalDimensionException, NoRealSolutionException {
         LinearEquation.verifyDimensionEquality(equations);
         final Matrix[] system = Matrix.getSystem(equations);
-        final Matrix[] solution = system[0].reducedRowEchelon(system[1]);
+        final ParametricForm model = new ParametricForm(system[0], system[1]);
+        this.parameters = model.parameters;
+        this.constant = model.constant;
+    }
+
+    /**
+     * Creates a new {@code ParametricForm} from a coefficient {@code Matrix} and a constant
+     * {@code Matrix}.
+     * @param coefficient the coefficient {@code Matrix}.
+     * @param constant the constant {@code Matrix}.
+     * @throws IllegalDimensionException if not all {@code LinearEquations} have equal dimension.
+     * @throws NoRealSolutionException if the system is inconsistent.
+     */
+    public ParametricForm(Matrix coefficient, Matrix constant) throws IllegalDimensionException, NoRealSolutionException {
+        final Matrix[] solution = coefficient.reducedRowEchelon(constant);
         Matrix.verifyConditionalConsistency(solution[0], solution[1]);
+        final Vector[] length = new Vector[solution[0].maxColumnSize()];
         //TODO
         this.parameters = null;
         this.constant = null;
@@ -57,7 +72,7 @@ public class ParametricForm {
         for(int i = 0; i < length; i++) {
             sum = sum.add(this.parameters[i].scale(c[i]));
         }
-        return null;
+        return sum;
     }
 
     /**

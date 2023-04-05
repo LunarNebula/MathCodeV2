@@ -1,31 +1,26 @@
 package Turing;
 
+import Exception.*;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 public enum Movement {
-    LEFT("<<", -1),
-    RIGHT(">>", 1),
-    STOP("||", 0);
+    LEFT("<<"),
+    RIGHT(">>"),
+    STOP("||");
 
-    // The String equivalent of this Movement
+    // The String equivalent of this Movement.
     private final String printValue;
-    // The translation amount for this Movement
-    private final int translation;
+    private static final String LEFT_KEY = "L";
+    private static final String RIGHT_KEY = "R";
+    private static final String STOP_KEY = "S";
 
     /**
-     * Creates a new Movement
-     * @param print the print value of this Movement
-     * @param translation the translation value of this Movement
+     * Creates a new {@code Movement}.
+     * @param print the print value of this {@code Movement}.
      */
-    Movement(String print, int translation) {
+    Movement(String print) {
         this.printValue = print;
-        this.translation = translation;
-    }
-
-    /**
-     * Finds the translation quantity for this Movement
-     * @return this.translation
-     */
-    public int getTranslation() {
-        return this.translation;
     }
 
     /**
@@ -42,5 +37,31 @@ public enum Movement {
      */
     public void print() {
         System.out.println(this);
+    }
+
+    // Static methods
+
+    /**
+     * Gets the {@code Movement} corresponding to an input value.
+     * @param value the {@code String} input value of the {@code Movement}.
+     * @return one of the following:
+     * <ul>
+     *     <li>{@code Movement.LEFT} if the input is {@code "L"}.</li>
+     *     <li>{@code Movement.RIGHT} if the input is {@code "R"}.</li>
+     *     <li>{@code Movement.STOP} if the input is {@code "S"}.</li>
+     * </ul>
+     * @throws IllegalArgumentException if the input {@code String} does not match any of
+     * the options above.
+     */
+    @Contract(pure = true)
+    public static Movement get(@NotNull String value) {
+        return switch (value) {
+            case LEFT_KEY -> Movement.LEFT;
+            case RIGHT_KEY -> Movement.RIGHT;
+            case STOP_KEY -> Movement.STOP;
+            default -> throw new IllegalArgumentException(
+                    ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN()
+            );
+        };
     }
 }
