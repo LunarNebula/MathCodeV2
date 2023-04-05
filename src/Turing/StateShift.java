@@ -1,4 +1,4 @@
-package TuringX;
+package Turing;
 
 public class StateShift<Label, Cell> {
     private final Label nextState;

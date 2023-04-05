@@ -1,4 +1,4 @@
-package TuringX;
+package Turing;
 
 public record TapeShift<Cell>(Cell tapeValue, Movement movement) {
     /**

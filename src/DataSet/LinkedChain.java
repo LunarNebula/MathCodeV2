@@ -1,6 +1,7 @@
 package DataSet;
 
 import General.TrueTextEncodable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -10,14 +11,27 @@ public class LinkedChain<Value> implements Iterable<Value>, TrueTextEncodable {
     private int size, cursorIndex;
 
     /**
-     * Creates a new LinkedChain
+     * Creates a new {@code LinkedChain}.
      */
     public LinkedChain() {
         clear();
     }
 
     /**
-     * Empties this LinkedChain
+     * Creates a new {@code LinkedChain} with an initialized value. The cursor starts at
+     * the head of the chain.
+     * @param values the set of starter values.
+     */
+    @SafeVarargs
+    public LinkedChain(Value @NotNull ... values) {
+        clear();
+        for(int i = values.length - 1; i >= 0; i--) {
+            addToStart(values[i]);
+        }
+    }
+
+    /**
+     * Empties this {@code LinkedChain}.
      */
     public void clear() {
         this.head = null;
@@ -118,6 +132,25 @@ public class LinkedChain<Value> implements Iterable<Value>, TrueTextEncodable {
             throw new NoSuchElementException();
         }
         return this.cursor.value;
+    }
+
+    /**
+     * Creates a deep copy of this {@code LinkedChain}.
+     * @return the copy.
+     */
+    public LinkedChain<Value> copy() {
+        LinkedChain<Value> copy = new LinkedChain<Value>();
+        Cell<Value> pointer = this.head;
+        int index = 0;
+        while(pointer != null) {
+            copy.addToEnd(pointer.value);
+            if(index == this.cursorIndex) {
+                copy.cursor = copy.tail;
+            }
+            pointer = pointer.next;
+            index++;
+        }
+        return copy;
     }
 
     /**
