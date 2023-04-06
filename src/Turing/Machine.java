@@ -172,7 +172,7 @@ public class Machine<Label, Cell> {
             throws IllegalArgumentException {
         try (Scanner scanner = new Scanner(new File(filename))) {
             final int THIS_STATE_INDEX = 0, CELL_INDEX = 1, NEXT_STATE_INDEX = 2, NEXT_CELL_INDEX = 3;
-            final String WHITESPACE = " ", DASH = "-", COLON = ":";
+            final String WHITESPACE = " ", DASH = "-", COMMA = ",";
             final Map<String, State<String, Integer>> stateMap = new HashMap<>();
             for(String state : scanner.nextLine().split(WHITESPACE)) {
                 stateMap.put(state, new State<>(state));
@@ -183,13 +183,13 @@ public class Machine<Label, Cell> {
             }
             while(scanner.hasNext()) {
                 final String[] transformation = scanner.nextLine().split(WHITESPACE);
-                final String[] stringCellCombo = transformation[CELL_INDEX].split(DASH);
+                final String[] stringCellCombo = transformation[CELL_INDEX].split(COMMA);
                 final Integer[] cellCombo = new Integer[stringCellCombo.length];
                 for(int i = 0; i < cellCombo.length; i++) {
                     cellCombo[i] = cellMap.get(stringCellCombo[i]);
                 }
                 final TapeShift[] tapeShifts = new TapeShift[cellCombo.length];
-                final String[] nextShifts = transformation[NEXT_CELL_INDEX].split(COLON);
+                final String[] nextShifts = transformation[NEXT_CELL_INDEX].split(COMMA);
                 for(int i = 0; i < tapeShifts.length; i++) {
                     final String[] parameters = nextShifts[i].split(DASH);
                     tapeShifts[i] = new TapeShift<>(cellMap.get(parameters[0]), Movement.get(parameters[1]));
