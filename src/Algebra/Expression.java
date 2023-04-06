@@ -3,6 +3,7 @@ package Algebra;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Stack;
 
 public class Expression {
     // Stores the value of this Expression
@@ -19,7 +20,7 @@ public class Expression {
     }
 
     /**
-     * Initializes and parses a Expression
+     * Initializes and parses an Expression
      * @param function the Expression as a String
      */
     public Expression(String function) {
@@ -33,7 +34,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for addition
+     * Parses an Expression for addition
      * @param function the parsable function
      */
     private void parseAddition(String function) {
@@ -60,7 +61,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for subtraction
+     * Parses an Expression for subtraction
      * @param function the parsable function
      */
     private void parseSubtraction(String function) {
@@ -87,7 +88,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for multiplication
+     * Parses an Expression for multiplication
      * @param function the parsable function
      */
     private void parseMultiplication(String function) {
@@ -114,7 +115,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for division
+     * Parses an Expression for division
      * @param function the parsable function
      */
     private void parseDivision(String function) {
@@ -141,7 +142,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for negation
+     * Parses an Expression for negation
      * @param function the parsable function
      */
     private void parseNegation(String function) {
@@ -156,7 +157,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for exponentiation
+     * Parses an Expression for exponentiation
      * @param function the parsable function
      */
     private void parseExponentiation(String function) {
@@ -183,7 +184,7 @@ public class Expression {
     }
 
     /**
-     * Parses a Expression for parenthetical operations
+     * Parses an Expression for parenthetical operations
      * @param function the parsable function
      */
     private void parseParentheses(String function) {
@@ -455,10 +456,22 @@ public class Expression {
      * @return an exact replica of this Expression
      */
     public Expression deepCopy() {
+        Stack<Expression> thisStack = new Stack<>(), copyStack = new Stack<>();
         Expression copy = new Expression();
-        copy.value = this.value;
-        for(Expression child : this.children) {
-            copy.children.add(child.deepCopy());
+        thisStack.push(this);
+        copyStack.push(copy);
+        while(! thisStack.isEmpty()) {
+            final Expression thisCursor = thisStack.pop();
+            final Expression copyCursor = copyStack.pop();
+            copyCursor.value = thisCursor.value;
+            for(Expression child : thisCursor.children) {
+                thisStack.push(child);
+            }
+            for(int i = 0; i < thisCursor.children.size(); i++) {
+                final Expression child = new Expression();
+                copyCursor.children.add(child);
+                copyStack.push(child);
+            }
         }
         return copy;
     }
@@ -615,7 +628,7 @@ public class Expression {
      * Prints this Expression
      */
     public void print() {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     /**
