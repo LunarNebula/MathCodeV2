@@ -4,25 +4,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-public class Function {
-    // Stores the value of this Function
+public class Expression {
+    // Stores the value of this Expression
     private String value;
     // Stores the list of Functions the Operation operates on
-    private List<Function> children;
+    private List<Expression> children;
 
     /**
-     * Creates an empty Function
+     * Creates an empty Expression
      */
-    public Function() {
+    public Expression() {
         this.value = "";
         this.children = new LinkedList<>();
     }
 
     /**
-     * Initializes and parses a Function
-     * @param function the Function as a String
+     * Initializes and parses a Expression
+     * @param function the Expression as a String
      */
-    public Function(String function) {
+    public Expression(String function) {
         this.children = new LinkedList<>();
         try {
             parseAddition(function.replace(" ", ""));
@@ -33,7 +33,7 @@ public class Function {
     }
 
     /**
-     * Parses a Function for addition
+     * Parses a Expression for addition
      * @param function the parsable function
      */
     private void parseAddition(String function) {
@@ -43,7 +43,7 @@ public class Function {
             for(int i = 0; i < function.length(); i++) {
                 if(function.charAt(i) == '+') {
                     try {
-                        Function ADDITION = new Function(), SUBTRACTION = new Function();
+                        Expression ADDITION = new Expression(), SUBTRACTION = new Expression();
                         ADDITION.parseAddition(function.substring(0, i));
                         SUBTRACTION.parseSubtraction(function.substring(i + 1));
                         this.value = "+";
@@ -60,7 +60,7 @@ public class Function {
     }
 
     /**
-     * Parses a Function for subtraction
+     * Parses a Expression for subtraction
      * @param function the parsable function
      */
     private void parseSubtraction(String function) {
@@ -70,7 +70,7 @@ public class Function {
             for(int i = 0; i < function.length(); i++) {
                 if(function.charAt(i) == '-') {
                     try {
-                        Function SUBTRACTION = new Function(), MULTIPLICATION = new Function();
+                        Expression SUBTRACTION = new Expression(), MULTIPLICATION = new Expression();
                         SUBTRACTION.parseSubtraction(function.substring(0, i));
                         MULTIPLICATION.parseMultiplication(function.substring(i + 1));
                         this.value = "-";
@@ -87,7 +87,7 @@ public class Function {
     }
 
     /**
-     * Parses a Function for multiplication
+     * Parses a Expression for multiplication
      * @param function the parsable function
      */
     private void parseMultiplication(String function) {
@@ -97,7 +97,7 @@ public class Function {
             for(int i = 0; i < function.length(); i++) {
                 if(function.charAt(i) == '*') {
                     try {
-                        Function MULTIPLICATION = new Function(), DIVISION = new Function();
+                        Expression MULTIPLICATION = new Expression(), DIVISION = new Expression();
                         MULTIPLICATION.parseMultiplication(function.substring(0, i));
                         DIVISION.parseDivision(function.substring(i + 1));
                         this.value = "*";
@@ -114,7 +114,7 @@ public class Function {
     }
 
     /**
-     * Parses a Function for division
+     * Parses a Expression for division
      * @param function the parsable function
      */
     private void parseDivision(String function) {
@@ -124,7 +124,7 @@ public class Function {
             for(int i = 0; i < function.length(); i++) {
                 if(function.charAt(i) == '/') {
                     try {
-                        Function DIVISION = new Function(), NEGATION = new Function();
+                        Expression DIVISION = new Expression(), NEGATION = new Expression();
                         DIVISION.parseDivision(function.substring(0, i));
                         NEGATION.parseNegation(function.substring(i + 1));
                         this.value = "/";
@@ -141,12 +141,12 @@ public class Function {
     }
 
     /**
-     * Parses a Function for negation
+     * Parses a Expression for negation
      * @param function the parsable function
      */
     private void parseNegation(String function) {
         if(function.startsWith("-")) {
-            Function NEGATION = new Function();
+            Expression NEGATION = new Expression();
             NEGATION.parseNegation(function.substring(1));
             this.value = "-()";
             this.children.add(NEGATION);
@@ -156,7 +156,7 @@ public class Function {
     }
 
     /**
-     * Parses a Function for exponentiation
+     * Parses a Expression for exponentiation
      * @param function the parsable function
      */
     private void parseExponentiation(String function) {
@@ -166,7 +166,7 @@ public class Function {
             for(int i = 0; i < function.length(); i++) {
                 if(function.charAt(i) == '^') {
                     try {
-                        Function PARENTHESES = new Function(), NEGATION = new Function();
+                        Expression PARENTHESES = new Expression(), NEGATION = new Expression();
                         PARENTHESES.parseParentheses(function.substring(0, i));
                         NEGATION.parseNegation(function.substring(i + 1));
                         this.value = "^";
@@ -183,18 +183,18 @@ public class Function {
     }
 
     /**
-     * Parses a Function for parenthetical operations
+     * Parses a Expression for parenthetical operations
      * @param function the parsable function
      */
     private void parseParentheses(String function) {
         if(function.endsWith(")")) {
             if(function.startsWith("(")) {
-                Function ADDITION = new Function();
+                Expression ADDITION = new Expression();
                 ADDITION.parseAddition(function.substring(1, function.length() - 1));
                 this.value = "()";
                 this.children.add(ADDITION);
             } else if(function.startsWith("ln(")) {
-                Function ADDITION = new Function();
+                Expression ADDITION = new Expression();
                 ADDITION.parseAddition(function.substring(3, function.length() - 1));
                 this.value = "ln()";
                 this.children.add(ADDITION);
@@ -212,26 +212,26 @@ public class Function {
     }
 
     /**
-     * Simplifies this Function
+     * Simplifies this Expression
      */
     private void simplify() {
-        for(Function child : this.children) {
+        for(Expression child : this.children) {
             child.simplify();
         }
         switch (this.value) {
             case "+", "*" -> {
                 boolean isMultiplication = this.value.equals("*"), isNonzero = true;
-                ListIterator<Function> iterator = this.children.listIterator();
+                ListIterator<Expression> iterator = this.children.listIterator();
                 while (iterator.hasNext() && isNonzero) {
-                    Function child = iterator.next();
+                    Expression child = iterator.next();
                     if (child.value.equals(this.value)) {
                         iterator.remove();
-                        for (Function grandchild : child.children) {
+                        for (Expression grandchild : child.children) {
                             iterator.add(grandchild);
                         }
                     } else if(child.value.equals("()") && child.children.get(0).value.equals(this.value)) {
                         iterator.remove();
-                        for (Function descendant : child.children.get(0).children) {
+                        for (Expression descendant : child.children.get(0).children) {
                             iterator.add(descendant);
                         }
                     } else if(child.value.equals("0")) {
@@ -278,7 +278,7 @@ public class Function {
                 }
             }
             case "()" -> {
-                Function child = this.children.get(0);
+                Expression child = this.children.get(0);
                 if ("ln()^".contains(child.value) || child.isConstant() || child.isVariable()) {
                     this.value = child.value;
                     this.children = child.children;
@@ -297,7 +297,7 @@ public class Function {
                 }
             }
             case "ln()" -> {
-                Function child = this.children.get(0);
+                Expression child = this.children.get(0);
                 switch (child.value) {
                     case "()" -> {
                         child.value = child.children.get(0).value;
@@ -336,12 +336,12 @@ public class Function {
     }
 
     /**
-     * Adds this Function to another Function
-     * @param addend the addend Function
+     * Adds this Expression to another Expression
+     * @param addend the addend Expression
      * @return this + addend
      */
-    public Function add(Function addend) {
-        Function sum = new Function();
+    public Expression add(Expression addend) {
+        Expression sum = new Expression();
         sum.value = "+";
         sum.children.add(deepCopy());
         sum.children.add(addend.deepCopy());
@@ -350,16 +350,16 @@ public class Function {
     }
 
     /**
-     * Subtracts another Function from this Function
-     * @param subtrahend the subtrahend Function
+     * Subtracts another Expression from this Expression
+     * @param subtrahend the subtrahend Expression
      * @return this - subtrahend
      */
-    public Function subtract(Function subtrahend) {
-        final Function difference = new Function(), thisDeepCopy = deepCopy(), subtrahendDeepCopy = subtrahend.deepCopy();
+    public Expression subtract(Expression subtrahend) {
+        final Expression difference = new Expression(), thisDeepCopy = deepCopy(), subtrahendDeepCopy = subtrahend.deepCopy();
         difference.value = "-";
         difference.children.add(thisDeepCopy);
         if(subtrahend.value.equals("+") || subtrahend.value.equals("-")) {
-            final Function PARENTHETICAL_TERM = new Function();
+            final Expression PARENTHETICAL_TERM = new Expression();
             PARENTHETICAL_TERM.value = "()";
             PARENTHETICAL_TERM.children.add(subtrahend);
             difference.children.add(PARENTHETICAL_TERM);
@@ -371,12 +371,12 @@ public class Function {
     }
 
     /**
-     * Multiplies this Function by another Function
-     * @param multiplicand the multiplicand Function
+     * Multiplies this Expression by another Expression
+     * @param multiplicand the multiplicand Expression
      * @return this * multiplicand
      */
-    public Function multiply(Function multiplicand) {
-        final Function product = new Function(), TERM_1 = new Function(), TERM_2 = new Function();
+    public Expression multiply(Expression multiplicand) {
+        final Expression product = new Expression(), TERM_1 = new Expression(), TERM_2 = new Expression();
         product.value = "*";
         TERM_1.value = "()";
         TERM_2.value = "()";
@@ -389,12 +389,12 @@ public class Function {
     }
 
     /**
-     * Divides this Function by another Function
-     * @param divisor the divisor Function
+     * Divides this Expression by another Expression
+     * @param divisor the divisor Expression
      * @return this / divisor
      */
-    public Function divide(Function divisor) {
-        final Function quotient = new Function(), TERM_1 = new Function(), TERM_2 = new Function();
+    public Expression divide(Expression divisor) {
+        final Expression quotient = new Expression(), TERM_1 = new Expression(), TERM_2 = new Expression();
         quotient.value = "/";
         TERM_1.value = "()";
         TERM_2.value = "()";
@@ -407,12 +407,12 @@ public class Function {
     }
 
     /**
-     * Raises this Function to the power of another Function
-     * @param pow the exponent Function
+     * Raises this Expression to the power of another Expression
+     * @param pow the exponent Expression
      * @return this ^ pow
      */
-    public Function pow(Function pow) {
-        final Function antilogarithm = new Function(), TERM_1 = new Function(), TERM_2 = new Function();
+    public Expression pow(Expression pow) {
+        final Expression antilogarithm = new Expression(), TERM_1 = new Expression(), TERM_2 = new Expression();
         antilogarithm.value = "^";
         TERM_1.value = "()";
         TERM_2.value = "()";
@@ -425,11 +425,11 @@ public class Function {
     }
 
     /**
-     * Negates this Function
+     * Negates this Expression
      * @return -this
      */
-    public Function negate() {
-        final Function negation = new Function(), TERM_1 = new Function();
+    public Expression negate() {
+        final Expression negation = new Expression(), TERM_1 = new Expression();
         negation.value = "-()";
         TERM_1.value = "()";
         TERM_1.children.add(deepCopy());
@@ -439,11 +439,11 @@ public class Function {
     }
 
     /**
-     * Takes the natural logarithm of this Function
+     * Takes the natural logarithm of this Expression
      * @return ln(this)
      */
-    public Function ln() {
-        final Function logarithm = new Function();
+    public Expression ln() {
+        final Expression logarithm = new Expression();
         logarithm.value = "ln()";
         logarithm.children.add(deepCopy());
         logarithm.simplify();
@@ -451,77 +451,77 @@ public class Function {
     }
 
     /**
-     * Provides a deep copy of this Function
-     * @return an exact replica of this Function
+     * Provides a deep copy of this Expression
+     * @return an exact replica of this Expression
      */
-    public Function deepCopy() {
-        Function copy = new Function();
+    public Expression deepCopy() {
+        Expression copy = new Expression();
         copy.value = this.value;
-        for(Function child : this.children) {
+        for(Expression child : this.children) {
             copy.children.add(child.deepCopy());
         }
         return copy;
     }
 
 //    /**
-//     * Evaluates the Function at a certain variable
+//     * Evaluates the Expression at a certain variable
 //     * @param x the target variable to be replaced
 //     * @param r the replacement value
-//     * @return the new Function
+//     * @return the new Expression
 //     */
-//    public Function evaluate(Function x, Function r) {
+//    public Expression evaluate(Expression x, Expression r) {
 //        if (! x.isVariable()) {
 //            return null;
 //        }
-//        ListIterator<Function> iterator = this.children.listIterator();
+//        ListIterator<Expression> iterator = this.children.listIterator();
 //        while(iterator.hasNext()) {
-//            Function child = iterator.next();
+//            Expression child = iterator.next();
 //
 //        }
 //        return null;
 //    }
 
     /**
-     * Finds the partial derivative of this Function with respect to an input variable
+     * Finds the partial derivative of this Expression with respect to an input variable
      * @param dx the comparator variable for derivation
-     * @return the partial derivative of this Function with respect to dx
-     * @throws IllegalArgumentException if the target Function is not a variable
+     * @return the partial derivative of this Expression with respect to dx
+     * @throws IllegalArgumentException if the target Expression is not a variable
      */
-    public Function partialDerivative(Function dx) throws IllegalArgumentException {
+    public Expression partialDerivative(Expression dx) throws IllegalArgumentException {
         if(! dx.isVariable()) {
             throw new IllegalArgumentException();
         }
-        Function derivative = new Function("0");
+        Expression derivative = new Expression("0");
         switch (this.value) {
             case "+" -> {
-                for(Function child : this.children) {
+                for(Expression child : this.children) {
                     derivative = derivative.add(child.partialDerivative(dx));
                 }
             }
             case "-" -> derivative = this.children.get(0).partialDerivative(dx).subtract(this.children.get(1).partialDerivative(dx));
             case "*" -> {
-                Function product = new Function("1");
-                for(Function child : this.children) {
+                Expression product = new Expression("1");
+                for(Expression child : this.children) {
                     derivative = derivative.multiply(child).add(child.partialDerivative(dx).multiply(product));
                     product = product.multiply(child);
                 }
             }
             case "/" -> {
-                Function a = this.children.get(0), b = this.children.get(1);
+                Expression a = this.children.get(0), b = this.children.get(1);
                 derivative = a.partialDerivative(dx).multiply(b).subtract(b.partialDerivative(dx).multiply(a)).divide(b.multiply(b));
             }
             case "^" -> derivative = multiply(this.children.get(1).multiply(this.children.get(0).ln()).partialDerivative(dx));
             case "()" -> derivative = this.children.get(0).partialDerivative(dx);
             case "ln()" -> derivative = this.children.get(0).partialDerivative(dx).divide(this.children.get(0));
             case "-()" -> derivative = this.children.get(0).partialDerivative(dx).negate();
-            default -> derivative= new Function(this.value.equals(dx.toString()) ? "1" : "0");
+            default -> derivative= new Expression(this.value.equals(dx.toString()) ? "1" : "0");
         }
         return derivative;
     }
 
     /**
-     * Determines whether this Function is a constant
-     * @return true if this Function is a single numerical constant, else false
+     * Determines whether this Expression is a constant
+     * @return true if this Expression is a single numerical constant, else false
      */
     public boolean isConstant() {
         for(char c : this.value.toCharArray()) {
@@ -533,8 +533,8 @@ public class Function {
     }
 
     /**
-     * Determines whether this Function is a variable
-     * @return true if this Function is a single variable, else false
+     * Determines whether this Expression is a variable
+     * @return true if this Expression is a single variable, else false
      */
     public boolean isVariable() {
         boolean containsLetter = false;
@@ -549,17 +549,17 @@ public class Function {
     }
 
     /**
-     * Determines whether this Function is equal to another Function
-     * @param o the comparator Function
+     * Determines whether this Expression is equal to another Expression
+     * @param o the comparator Expression
      * @return true if the two Functions are equal, else false
      */
     @Override
     public boolean equals(Object o) {
-        if(! (o instanceof Function comparator)) {
+        if(! (o instanceof Expression comparator)) {
             return false;
         }
-        ListIterator<Function> iterator = comparator.children.listIterator();
-        for(Function child : this.children) {
+        ListIterator<Expression> iterator = comparator.children.listIterator();
+        for(Expression child : this.children) {
             if(! (iterator.hasNext() || child.equals(iterator.next()))) {
                 return false;
             }
@@ -568,15 +568,15 @@ public class Function {
     }
 
     /**
-     * Converts this Function to a printable format
-     * @return this Function as a String
+     * Converts this Expression to a printable format
+     * @return this Expression as a String
      */
     @Override
     public String toString() {
         String print = "";
         switch (this.value) {
             case "+", "-", "*", "/", "^" -> {
-                for (Function child : this.children) {
+                for (Expression child : this.children) {
                     print = print.concat(this.value).concat(child.toString());
                 }
                 print = print.substring(1);
@@ -590,36 +590,36 @@ public class Function {
     }
 
     /**
-     * Converts this Function to a printable format while preserving its recursive layers
-     * @return this Function as a String tree
+     * Converts this Expression to a printable format while preserving its recursive layers
+     * @return this Expression as a String tree
      */
     public String treeToString() {
         return treeToString("");
     }
 
     /**
-     * Converts this Function to a printable format while preserving its recursive layers
-     * @param indent the indent that represents the location of this child Function in the Function tree
-     * @return this Function as a tree
+     * Converts this Expression to a printable format while preserving its recursive layers
+     * @param indent the indent that represents the location of this child Expression in the Expression tree
+     * @return this Expression as a tree
      */
     private String treeToString(String indent) {
         String print = indent.concat(this.value);
         indent = indent.concat("\t");
-        for(Function child : this.children) {
+        for(Expression child : this.children) {
             print = print.concat("\n").concat(child.treeToString(indent));
         }
         return print;
     }
 
     /**
-     * Prints this Function
+     * Prints this Expression
      */
     public void print() {
         System.out.println(toString());
     }
 
     /**
-     * Prints this Function as a tree
+     * Prints this Expression as a tree
      */
     public void printTree() {
         System.out.println(treeToString());
