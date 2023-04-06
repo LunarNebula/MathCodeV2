@@ -1,16 +1,17 @@
 package Turing;
 
+import java.util.List;
+
 public class StateShift<Label, Cell> {
     private final Label nextState;
-    private final TapeShift<Cell>[] shifts;
+    private final List<TapeShift<Cell>> shifts;
 
     /**
      * Creates a new {@code StateShift}.
      * @param nextState the next {@code State} to switch to.
      * @param shifts the set of {@code TapeShifts} to transform the current tape state.
      */
-    @SafeVarargs
-    public StateShift(Label nextState, TapeShift<Cell>... shifts) {
+    public StateShift(Label nextState, List<TapeShift<Cell>> shifts) {
         this.nextState = nextState;
         this.shifts = shifts;
     }
@@ -29,7 +30,7 @@ public class StateShift<Label, Cell> {
      * @return the shift at that index.
      */
     public TapeShift<Cell> getShift(int index) {
-        return this.shifts[index];
+        return this.shifts.get(index);
     }
 
     /**
@@ -37,7 +38,7 @@ public class StateShift<Label, Cell> {
      * @return {@code this.shifts.length}
      */
     public int size() {
-        return this.shifts.length;
+        return this.shifts.size();
     }
 
     /**
@@ -53,8 +54,8 @@ public class StateShift<Label, Cell> {
         } else if(! this.nextState.equals(stateShift.nextState)) {
             return false;
         }
-        for(int i = 0; i < this.shifts.length; i++) {
-            if(! this.shifts[i].equals(stateShift.shifts[i])) {
+        for(int i = 0; i < this.shifts.size(); i++) {
+            if(! this.shifts.get(i).equals(stateShift.shifts.get(i))) {
                 return false;
             }
         }

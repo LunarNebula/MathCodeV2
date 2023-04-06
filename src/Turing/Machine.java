@@ -188,11 +188,11 @@ public class Machine<Label, Cell> {
                 for(int i = 0; i < cellCombo.length; i++) {
                     cellCombo[i] = cellMap.get(stringCellCombo[i]);
                 }
-                final TapeShift[] tapeShifts = new TapeShift[cellCombo.length];
+                final List<TapeShift<Integer>> tapeShifts = new ArrayList<>(cellCombo.length);
                 final String[] nextShifts = transformation[NEXT_CELL_INDEX].split(COMMA);
-                for(int i = 0; i < tapeShifts.length; i++) {
+                for(int i = 0; i < cellCombo.length; i++) {
                     final String[] parameters = nextShifts[i].split(DASH);
-                    tapeShifts[i] = new TapeShift<>(cellMap.get(parameters[0]), Movement.get(parameters[1]));
+                    tapeShifts.add(new TapeShift<>(cellMap.get(parameters[0]), Movement.get(parameters[1])));
                 }
                 MultiKey<Integer> key = new MultiKey<>(cellCombo);
                 State<String, Integer> state = stateMap.get(transformation[THIS_STATE_INDEX]);
