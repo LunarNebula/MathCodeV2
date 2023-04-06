@@ -3,6 +3,7 @@ package Turing;
 import DataKey.MultiKey;
 import DataSet.LinkedChain;
 import Exception.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -167,8 +168,8 @@ public class Machine<Label, Cell> {
      * @throws IllegalArgumentException if the {@code Machine} defined by the file
      * uses invalid syntax.
      */
-    @SuppressWarnings(ExceptionMessage.UNCHECKED)
-    public static Machine<String, Integer> getMachineFromFile(String filename) throws IllegalArgumentException {
+    public static @NotNull Machine<String, Integer> getMachineFromFile(String filename)
+            throws IllegalArgumentException {
         try (Scanner scanner = new Scanner(new File(filename))) {
             final int THIS_STATE_INDEX = 0, CELL_INDEX = 1, NEXT_STATE_INDEX = 2, NEXT_CELL_INDEX = 3;
             final String WHITESPACE = " ", DASH = "-", COLON = ":";
