@@ -2,8 +2,7 @@ package GraphX;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Stores a discrete graph. This object consists of a set of objects called
@@ -100,6 +99,61 @@ public class Graph<VLabel, ELabel> {
             }
         }
         return false;
+    }
+
+    /**
+     * Performs a depth-first search from a {@code Vertex} in this {@code Graph} and
+     * records some subset of the {@code Vertices} traversed.
+     * @param start the starting {@code Vertex}.
+     * @param recordStart {@code true} if this algorithm should record a {@code Vertex}
+     *                                when it is first reached, else {@code false}.
+     * @param recordLooped {@code true} if this algorithm should record a {@code Vertex}
+     *                                 when it is reached in a loop, else {@code false}.
+     * @param recordEnd {@code true} if this algorithm should record a {@code Vertex}
+     *                              when it is popped off the stack, else {@code false}.
+     * @return the list of {@code Vertices} traversed according to the above specifications.
+     */
+    public List<VLabel> DFS(VLabel start,
+                            boolean recordStart,
+                            boolean recordLooped,
+                            boolean recordEnd) {
+        final Stack<Vertex<VLabel, ELabel>> stack = new Stack<>();
+        stack.push(this.vertexMap.get(start));
+        final Stack<Boolean> checkStack = new Stack<>();
+        checkStack.push(true);
+        final List<VLabel> traversal = new ArrayList<>();
+        final HashSet<VLabel> visited = new HashSet<>();
+        final Map<VLabel, VLabel> previous = new HashMap<>();
+        previous.put(start, null);
+        while(! stack.isEmpty()) {
+            final Vertex<VLabel, ELabel> cursor = stack.pop();
+            final VLabel label = cursor.label();
+            if(checkStack.pop()) {
+                stack.push(cursor);
+                checkStack.push(false);
+                visited.add(label);
+                if(recordStart) {
+                    traversal.add(label);
+                }
+                final VLabel prev = previous.get(label);
+                final Map<VLabel, Edge<ELabel, VLabel>> map = cursor.neighbors();
+                for(VLabel next : map.keySet()) {
+                    if(! next.equals(prev)) {
+                        if(visited.contains(next)) {
+                            if(recordLooped) {
+                                traversal.add(next);
+                            }
+                        } else {
+                            stack.push(map.get(next).tail());
+                            checkStack.push(true);
+                        }
+                    }
+                }
+            } else if(recordEnd) {
+                traversal.add(label);
+            }
+        }
+        return traversal;
     }
 
     /**

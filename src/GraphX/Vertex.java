@@ -103,6 +103,14 @@ public class Vertex<VLabel, ELabel> {
     }
 
     /**
+     * Gets the set of all neighbors traversable from this {@code Vertex}.
+     * @return {@code this.mapByTail}
+     */
+    public Map<VLabel, Edge<ELabel, VLabel>> neighbors() {
+        return this.mapByTail;
+    }
+
+    /**
      * Finds the in-degree of this {@code Vertex}, or the number of {@code Edges}
      * with this {@code Vertex} as the tail.
      * @return {@code this.mapByHead.size()}
