@@ -11,36 +11,36 @@ import java.util.Map;
  * <ul>
  *     <li>{@code label} - the unique label assigned to this {@code Vertex} for
  *     identification.</li>
- *     <li>{@code mapBySink} - the set of {@code Edges} with this {@code Vertex}
- *     as the source. Each {@code Edge} is indexed in the map by its sink node.</li>
- *     <li>{@code mapBySource} - the set of {@code Edges} with this {@code Vertex}
- *     as the sink. Each {@code Edge} is indexed in the map by its source node.</li>
+ *     <li>{@code mapByTail} - the set of {@code Edges} with this {@code Vertex}
+ *     as the head. Each {@code Edge} is indexed in the map by its tail node.</li>
+ *     <li>{@code mapByHead} - the set of {@code Edges} with this {@code Vertex}
+ *     as the tail. Each {@code Edge} is indexed in the map by its head node.</li>
  * </ul>
- * @param <Label> the label class object for this {@code Vertex}.
- * @param <EdgeLabel> the label class object for any {@code Edge} corresponding
+ * @param <VLabel> the label class object for this {@code Vertex}.
+ * @param <ELabel> the label class object for any {@code Edge} corresponding
  *                   to this {@code Vertex}.
  * @see Edge
  * @see Graph
  */
-public class Vertex<Label, EdgeLabel> {
-    private final Label label;
-    private final Map<Vertex<Label, EdgeLabel>, Edge<EdgeLabel, Label>> mapBySink, mapBySource;
+public class Vertex<VLabel, ELabel> {
+    private final VLabel label;
+    private final Map<VLabel, Edge<ELabel, VLabel>> mapByTail, mapByHead;
 
     /**
      * Creates a new {@code Vertex}.
      * @param label the label for this {@code Vertex}.
      */
-    public Vertex(Label label) {
+    public Vertex(VLabel label) {
         this.label = label;
-        this.mapBySink = new HashMap<>();
-        this.mapBySource = new HashMap<>();
+        this.mapByTail = new HashMap<>();
+        this.mapByHead = new HashMap<>();
     }
 
     /**
      * Gets the label for this {@code Vertex}.
      * @return {@code this.label}
      */
-    public Label label() {
+    public VLabel label() {
         return this.label;
     }
 
@@ -52,12 +52,12 @@ public class Vertex<Label, EdgeLabel> {
      * @return {@code true} if the new {@code Vertex} was successfully added as a
      * neighbor, else {@code false} if the target {@code Vertex} was already a neighbor.
      */
-    public boolean addNeighbor(@NotNull Vertex<Label, EdgeLabel> vertex, @NotNull EdgeLabel label) {
-        final boolean isNewNeighbor = (this.mapBySink.get(vertex) == null);
+    public boolean addNeighbor(@NotNull Vertex<VLabel, ELabel> vertex, @NotNull ELabel label) {
+        final boolean isNewNeighbor = (this.mapByTail.get(vertex.label) == null);
         if(isNewNeighbor) {
-            final Edge<EdgeLabel, Label> edge = new Edge<>(label, this, vertex);
-            this.mapBySink.put(vertex, edge);
-            vertex.mapBySource.put(this, edge);
+            final Edge<ELabel, VLabel> edge = new Edge<>(label, this, vertex);
+            this.mapByTail.put(vertex.label, edge);
+            vertex.mapByHead.put(this.label, edge);
         }
         return isNewNeighbor;
     }
@@ -65,11 +65,11 @@ public class Vertex<Label, EdgeLabel> {
     /**
      * Determines whether a specified {@code Vertex} is a neighbor of this {@code Vertex}.
      * @param vertex the target neighbor {@code Vertex} label.
-     * @return {@code true} if there exists an {@code Edge} whose source is this {@code Vertex} and
-     * whose sink is the target {@code Vertex}, else {@code false} if no such {@code Edge} exists.
+     * @return {@code true} if there exists an {@code Edge} whose head is this {@code Vertex} and
+     * whose tail is the target {@code Vertex}, else {@code false} if no such {@code Edge} exists.
      */
-    public boolean isNeighbor(@NotNull Label vertex) {
-        return this.mapBySink.containsKey(vertex);
+    public boolean isNeighbor(@NotNull VLabel vertex) {
+        return this.mapByTail.containsKey(vertex);
     }
 
     /**
@@ -78,8 +78,8 @@ public class Vertex<Label, EdgeLabel> {
      * @return {@code true} if the target {@code Edge} has this {@code Vertex} as one
      * of its endpoints, else {@code false} if neither endpoint is equal to this {@code Edge}.
      */
-    public boolean isIncident(@NotNull Edge<EdgeLabel, Label> edge) {
-        return this.label.equals(edge.sink().label) || this.label.equals(edge.source().label);
+    public boolean isIncident(@NotNull Edge<ELabel, VLabel> edge) {
+        return this.label.equals(edge.tail().label) || this.label.equals(edge.head().label);
     }
 
     /**
@@ -88,8 +88,8 @@ public class Vertex<Label, EdgeLabel> {
      * @return the corresponding {@code Edge}, else {@code null} if no such
      * {@code Edge} exists.
      */
-    public Edge<EdgeLabel, Label> getEdgeFrom(@NotNull Vertex<Label, EdgeLabel> vertex) {
-        return this.mapBySource.get(vertex);
+    public Edge<ELabel, VLabel> getEdgeFrom(@NotNull VLabel vertex) {
+        return this.mapByHead.get(vertex);
     }
 
     /**
@@ -98,7 +98,54 @@ public class Vertex<Label, EdgeLabel> {
      * @return the corresponding {@code Edge}, else {@code null} if no such
      * {@code Edge} exists.
      */
-    public Edge<EdgeLabel, Label> getEdgeTo(@NotNull Vertex<Label, EdgeLabel> vertex) {
-        return this.mapBySink.get(vertex);
+    public Edge<ELabel, VLabel> getEdgeTo(@NotNull VLabel vertex) {
+        return this.mapByTail.get(vertex);
+    }
+
+    /**
+     * Finds the in-degree of this {@code Vertex}, or the number of {@code Edges}
+     * with this {@code Vertex} as the tail.
+     * @return {@code this.mapByHead.size()}
+     */
+    public int inDegree() {
+        return this.mapByHead.size();
+    }
+
+    /**
+     * Finds the out-degree of this {@code Vertex}, or the number of {@code Edges}
+     * with this {@code Vertex} as the head.
+     * @return {@code this.mapByTail.size()}
+     */
+    public int outDegree() {
+        return this.mapByTail.size();
+    }
+
+    /**
+     * Determines whether this {@code Vertex} is equal to a specified {@code Object}.
+     * @param o the target {@code Object}.
+     * @return {@code true} if {@code o} is a {@code Vertex} with the same label.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(! (o instanceof Vertex<?,?> vertex)) {
+            return false;
+        }
+        return vertex.label.equals(this.label);
+    }
+
+    /**
+     * Converts this {@code Vertex} to a printable format.
+     * @return this {@code Vertex} as a {@code String}.
+     */
+    @Override
+    public String toString() {
+        return this.label.toString();
+    }
+
+    /**
+     * Prints this {@code Vertex}.
+     */
+    public void print() {
+        System.out.println(this);
     }
 }
