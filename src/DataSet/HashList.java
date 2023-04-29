@@ -5,23 +5,23 @@ import General.TrueTextEncodable;
 import java.util.*;
 
 /**
- * Maintains a doubly-linked List- and HashSet-organized data structure
- * @param <Value> the target object
+ * Maintains a doubly-linked {@code List-} and {@code HashSet-}organized data structure.
+ * @param <Value> the stored data type.
  */
 public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     private final Map<Value, Cell<Value>> map;
     private Cell<Value> head, tail;
 
     /**
-     * Creates a HashList
+     * Creates a new, empty {@code HashList}.
      */
     public HashList() {
         this.map = new HashMap<>();
     }
 
     /**
-     * Creates a HashList
-     * @param values the list of starter values for this HashList
+     * Creates a {@code HashList} with a starter set of {@code Values}.
+     * @param values the list of starter {@code Values} for this {@code HashList}.
      */
     public HashList(Iterable<Value> values) {
         HashList<Value> hashList = new HashList<Value>();
@@ -32,9 +32,11 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Adds a Cell into this HashList
-     * @param value the target Value
-     * @return true if the target Value was not previously contained in this HashList, else false
+     * Adds a {@code Value} into this {@code HashList}.
+     * @param value the target {@code Value}.
+     * @return {@code true} if the target {@code Value} was successfully added
+     * to this {@code HashList}, else {@code false} if the {@code Value} was
+     * already contained in this {@code HashList}.
      */
     public boolean add(Value value) {
         if(this.map.containsKey(value)) {
@@ -53,9 +55,11 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Adds a List of HashNodes into this HashList
-     * @param iterable the target Iterable
-     * @return true if all new elements were not previously contained in this HashList, else false
+     * Adds a list of HashNodes into this {@code HashList}.
+     * @param iterable the target {@code Iterable}.
+     * @return {@code true} if all new elements were successfully added to this
+     * {@code HashList}, else {@code false} if at least one element already existed
+     * in this {@code HashList}.
      */
     public boolean addAll(Iterable<Value> iterable) {
         boolean allElementsAreOriginal = true;
@@ -66,10 +70,11 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Inserts a Cell into this HashList at the specified index
-     * @param index the index of this HashList
-     * @param value the target Value
-     * @throws IndexOutOfBoundsException if the insertion index is not included in the HashList
+     * Inserts a {@code Value} into this {@code HashList} at the specified index.
+     * @param index the index of this {@code HashList}.
+     * @param value the target {@code Value}.
+     * @throws IndexOutOfBoundsException if the insertion index is not included in
+     * the {@code HashList}.
      */
     public boolean insert(int index, Value value) {
         if(this.map.containsKey(value)) {
@@ -101,26 +106,27 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Checks if this HashList contains a Key
-     * @param value the target value
-     * @return true if this HashList contains the target Key, else false
+     * Checks if this {@code HashList} contains a key.
+     * @param value the target {@code Value}.
+     * @return {@code true} if this {@code HashList} contains the target key,
+     * else {@code false}.
      */
     public boolean contains(Value value) {
         return this.map.containsKey(value);
     }
 
     /**
-     * Gets the Value located in the Cell of a specific Key
-     * @return the desired Value
+     * Gets the {@code Value} located in the {@code Cell} of a specific key.
+     * @return the desired {@code Value}.
      */
     public Value get(Value value) {
         return this.map.get(value).value;
     }
 
     /**
-     * Gets the Value located at a specific index in this HashList
-     * @param index the target index
-     * @return the target Value
+     * Gets the {@code Value} located at a specific index in this {@code HashList}.
+     * @param index the target index.
+     * @return the target {@code Value}.
      */
     public Value get(int index) {
         if(index < 0 || index >= size()) {
@@ -137,7 +143,7 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Clears this HashList
+     * Clears this {@code HashList}.
      */
     public void clear() {
         this.head = null;
@@ -146,13 +152,15 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Determines if this HashList contains all Values in a specified HashList
-     * @param c the target HashList
-     * @return true if all Values in the HashList are in this HashList, else false
+     * Determines if this {@code HashList} contains all {@code Values} in a
+     * specified {@code HashList}.
+     * @param c the target {@code HashList}.
+     * @return {@code true} if all {@code Values} in the {@code HashList} are
+     * in this {@code HashList}, else {@code false}.
      */
     public boolean containsAll(HashList<? extends Value> c) {
         for(Value value : c) {
-            if(contains(value)) {
+            if(! contains(value)) {
                 return false;
             }
         }
@@ -160,9 +168,26 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Removes a specific element from this HashList
-     * @param value the target Value
-     * @return true if an element was successfully removed, else false
+     * Determines whether this {@code HashList} contains any values in another
+     * specified {@code HashList}.
+     * @param c the target {@code HashList}.
+     * @return {@code true} if any {@code Values} in the {@code HashList} are contained
+     * in this {@code HashList}, else {@code false}.
+     */
+    public boolean containsAny(HashList<? extends Value> c) {
+        for(Value value : c) {
+            if(contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes a specific element from this {@code HashList}.
+     * @param value the target {@code Value}.
+     * @return {@code true} if the desired element was successfully removed, else
+     * {@code false} if the element did not previously exist in this {@code HashList}.
      */
     public boolean remove(Value value) {
         Cell<Value> removedItem = this.map.get(value);
@@ -184,11 +209,13 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Removes from this HashList an element at a specified index
-     * @param index the target index
-     * @return the Value removed from this HashList
+     * Removes from this {@code HashList} the element at a specified index.
+     * @param index the target index.
+     * @return the {@code Value} removed from this {@code HashList}.
+     * @throws IndexOutOfBoundsException if the target index is negative or
+     * at least the length of this {@code HashList}.
      */
-    public Value remove(int index) {
+    public Value remove(int index) throws IndexOutOfBoundsException {
         if(index < 0 || index >= this.size()) {
             throw new IndexOutOfBoundsException();
         }
@@ -204,10 +231,12 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Inserts a Value before another target Value in this HashList
-     * @param target the target Value
-     * @param value the new Value to be added to this HashList
-     * @return true if the target value exists in this HashList, else false
+     * Inserts a {@code Value} before another target {@code Value} in this
+     * {@code HashList}.
+     * @param target the {@code Value} to be used as a reference for placement.
+     * @param value the new {@code Value} to be added to this {@code HashList}.
+     * @return {@code true} if the reference {@code Value} exists in this {@code HashList},
+     * else {@code false} if the reference does not exist.
      */
     public boolean insertBefore(Value target, Value value) {
         Cell<Value> cell = this.map.get(target);
@@ -225,10 +254,11 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Inserts a Value after another target Value in this HashList
-     * @param target the target Value
-     * @param value the new Value to be added to this HashList
-     * @return true if the target value exists in this HashList, else false
+     * Inserts a {@code Value} after another target {@code Value} in this {@code HashList}.
+     * @param target the {@code Value} to be used as a reference for placement.
+     * @param value the new {@code Value} to be added to this {@code HashList}.
+     * @return {@code true} if the target {@code Value} exists in this {@code HashList},
+     * else {@code false} if the reference does not exist.
      */
     public boolean insertAfter(Value target, Value value) {
         Cell<Value> cell = this.map.get(target);
@@ -243,10 +273,10 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Creates a HashList of consecutive elements from this HashList
-     * @param fromIndex the first index (inclusive) where an element is added to the List
-     * @param toIndex the last index (exclusive) where an element is added to the List
-     * @return the subset List
+     * Creates a {@code HashList} of consecutive elements from this {@code HashList}.
+     * @param fromIndex the first index (inclusive) where an element is referenced.
+     * @param toIndex the last index (exclusive) where an element is referenced.
+     * @return the subset {@code HashList}.
      */
     public HashList<Value> subList(int fromIndex, int toIndex) {
         HashList<Value> list = new HashList<Value>();
@@ -267,33 +297,34 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Finds the Value in the head of this HashList
-     * @return this.head.value
+     * Finds the {@code Value} in the head of this {@code HashList}.
+     * @return {@code this.head.value}
      */
     public Value getHead() {
         return this.head.value;
     }
 
     /**
-     * Finds the Value in the tail of this HashList
-     * @return this.tail.value
+     * Finds the {@code Value} in the tail of this {@code HashList}.
+     * @return {@code this.tail.value}
      */
     public Value getTail() {
         return this.tail.value;
     }
 
     /**
-     * Finds the size of this HashList
-     * @return this.map.size
+     * Finds the size of this {@code HashList}.
+     * @return {@code this.map.size}
      */
     public int size() {
         return this.map.size();
     }
 
     /**
-     * Gets the index of a specific Value in this HashList
-     * @param value the target Value
-     * @return the number of nodes traversed before reaching this Value, else -1 if this Value is not in the List
+     * Gets the index of a specific {@code Value} in this {@code HashList}.
+     * @param value the target {@code Value}.
+     * @return the number of nodes traversed before reaching this {@code Value},
+     * else {@code -1} if this {@code Value} is not in this {@code HashList}.
      */
     public int indexOf(Value value) {
         if(value == null) {
@@ -312,16 +343,17 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Determines if this HashList is empty
-     * @return true if this.head is a null Cell, else false
+     * Determines if this {@code HashList} is empty.
+     * @return {@code true} if this {@code HashList} has no head, else {@code false}
+     * if the head is a valid {@code Cell}.
      */
     public boolean isEmpty() {
         return this.head == null;
     }
 
     /**
-     * Provides the TrueText of this HashList
-     * @return this HashList in a parsable format
+     * Provides the TrueText of this {@code HashList}.
+     * @return this {@code HashList} in a parsable format.
      */
     @Override
     public String trueText() {
@@ -337,8 +369,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Converts this HashList to a printable format
-     * @return this HashList as a String
+     * Converts this {@code HashList} to a printable format.
+     * @return this {@code HashList} as a {@code String}.
      */
     @Override
     public String toString() {
@@ -352,15 +384,15 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Prints this HashList
+     * Prints this {@code HashList}.
      */
     public void print() {
         System.out.println(this);
     }
 
     /**
-     * Returns an Iterator over elements
-     * @return an Iterator
+     * Returns an {@code Iterator} over all elements in this {@code HashList}.
+     * @return the desired {@code Iterator}.
      */
     @Override
     public Iterator<Value> iterator() {
@@ -369,8 +401,9 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             private Cell<Value> prevCursor = cursor;
 
             /**
-             * Checks if there is another unchecked element in this Iterator
-             * @return true if the Iterator has not reached all HashNodes, else false
+             * Checks if there is another unchecked element in this {@code Iterator}.
+             * @return {@code true} if the {@code Iterator} has not reached all
+             * elements, else {@code false} if there are no unvisited elements.
              */
             @Override
             public boolean hasNext() {
@@ -378,8 +411,9 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Gets the Value at the target cursor Cell
-             * @return the target Value if it exists, else null
+             * Gets the {@code Value} at the target cursor {@code Cell}.
+             * @return the target {@code Value} if it exists, else {@code null}
+             * if no such {@code Value} exists.
              */
             @Override
             public Value next() {
@@ -394,8 +428,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Removes the cursor from this HashList
-             * @throws IllegalStateException if remove() was called twice consecutively
+             * Removes the cursor from this {@code HashList}.
+             * @throws IllegalStateException if {@code remove()} was called twice consecutively.
              */
             @Override
             public void remove() {
@@ -409,8 +443,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * Returns an Iterator over elements
-     * @return an Iterator
+     * Returns a {@code ListIterator} over all elements in this {@code HashList}.
+     * @return the desired {@code ListIterator}.
      */
     public ListIterator<Value> listIterator() {
         return new ListIterator<>() {
@@ -420,8 +454,10 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             boolean removeIllegal = true, setIllegal = true;
 
             /**
-             * Determines if this ListIterator has another element
-             * @return true if there is another element, else false
+             * Determines if this {@code ListIterator} has another element.
+             * @return {@code true} if there is at least one unvisited element,
+             * else {@code false} if all elements in this {@code HashList} have
+             * been visited.
              */
             @Override
             public boolean hasNext() {
@@ -429,9 +465,9 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Gets the next element of this ListIterator if one exists
-             * @return the next Value in this ListIterator
-             * @throws NoSuchElementException when there is no next element
+             * Gets the next element of this {@code ListIterator} if one exists.
+             * @return the next {@code Value} in this {@code ListIterator}.
+             * @throws NoSuchElementException when there is no next element.
              */
             @Override
             public Value next() {
@@ -449,8 +485,10 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Determines whether there is an element in this ListIterator before the one last checked
-             * @return true if such a Value exists, else false
+             * Determines whether there is an element in this {@code ListIterator}
+             * before the one last checked.
+             * @return {@code true} if such a {@code Value} exists, else {@code false}
+             * if the cursor is at the beginning of this {@code HashList}.
              */
             @Override
             public boolean hasPrevious() {
@@ -458,9 +496,9 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Gets the previous element from this ListIterator
-             * @return the previous Value if one exists
-             * @throws NoSuchElementException if there is no previous element
+             * Gets the previous element from this {@code ListIterator}.
+             * @return the previous {@code Value} if one exists.
+             * @throws NoSuchElementException if there is no previous element.
              */
             @Override
             public Value previous() {
@@ -480,8 +518,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Gets the next index in this ListIterator
-             * @return this.index + 1
+             * Gets the next index in this {@code ListIterator}.
+             * @return {@code this.index + 1}
              */
             @Override
             public int nextIndex() {
@@ -489,8 +527,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Gets the previous index in this ListIterator
-             * @return this.index - 1
+             * Gets the previous index in this {@code ListIterator}.
+             * @return {@code this.index - 1}
              */
             @Override
             public int previousIndex() {
@@ -498,8 +536,9 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Removes an element from this ListIterator
-             * @throws IllegalStateException if add() has been called since the last next() or previous() invocation
+             * Removes an element from this {@code ListIterator}.
+             * @throws IllegalStateException if {@code add()} has been called since
+             * the last {@code next()} or {@code previous()} invocation.
              */
             @Override
             public void remove() {
@@ -512,9 +551,11 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Replaces a Value in this HashList with a different value
-             * @param value the new Value for the Cell
-             * @throws IllegalStateException if remove() or add() has been called since the last next() or previous() invocation
+             * Replaces a {@code Value} in this {@code HashList} with a
+             * different {@code Value}.
+             * @param value the new {@code Value} for the {@code Cell}.
+             * @throws IllegalStateException if {@code remove()} or {@code add()}
+             * has been called since the last {@code next()} or {@code previous()} invocation.
              */
             @Override
             public void set(Value value) {
@@ -526,8 +567,8 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
             }
 
             /**
-             * Adds an element before the cursor in this HashList
-             * @param value the new value
+             * Adds an element before the cursor in this {@code HashList}.
+             * @param value the new {@code Value}.
              */
             @Override
             public void add(Value value) {
@@ -545,16 +586,16 @@ public class HashList<Value> implements Iterable<Value>, TrueTextEncodable {
     }
 
     /**
-     * The node component of a HashList
-     * @param <Value> the item held in the Cell
+     * The node component of a {@code HashList}.
+     * @param <Value> the item held in the {@code Cell}.
      */
     private static class Cell<Value> {
         private final Value value;
         private Cell<Value> next, prev;
 
         /**
-         * Creates a new Cell
-         * @param value the item held in the Cell
+         * Creates a new {@code Cell}.
+         * @param value the item held in the {@code Cell}.
          */
         private Cell(Value value) {
             this.value = value;
