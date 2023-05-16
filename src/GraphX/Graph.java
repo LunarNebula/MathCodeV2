@@ -6,9 +6,9 @@ import java.util.*;
 
 /**
  * Stores a discrete graph. This object consists of a set of objects called
- * vertices, a set of objects called edges, and assigns to each edge a head
- * {@code Vertex} and a tail {@code Vertex}. This {@code Graph} object permits
- * a series of operations as is possible on such graphs.
+ * vertices, a set of objects called edges, and an assignment to each edge
+ * of a head {@code Vertex} and a tail {@code Vertex}. This {@code Graph}
+ * object permits a set of operations as is possible on such graphs.
  * @param <VLabel> the label data type given to each {@code Vertex}.
  * @param <ELabel> the label data type given to each {@code Edge}.
  * @see Edge
@@ -27,6 +27,14 @@ public class Graph<VLabel, ELabel> {
     }
 
     /**
+     * Creates and adds a {@code Vertex} to this {@code Graph}.
+     * @param label the label of the new {@code Vertex}.
+     */
+    public void addVertex(VLabel label) {
+        addVertex(new Vertex<>(label));
+    }
+
+    /**
      * Adds a {@code Vertex} to this {@code Graph}.
      * @param vertex the new {@code Vertex}.
      */
@@ -41,15 +49,39 @@ public class Graph<VLabel, ELabel> {
     /**
      * Adds an {@code Edge} to this {@code Graph}.
      * @param edge the new {@code Edge}.
+     * @throws IllegalArgumentException if either the head or the tail of the {@code Edge}
+     * is not already contained in this {@code Graph}.
      */
-    public void addEdge(@NotNull Edge<ELabel, VLabel> edge) {
-        final VLabel label = edge.head().label();
-        Map<VLabel, Edge<ELabel, VLabel>> sourceMap = this.mapByHead.get(label);
-        if(sourceMap == null) {
-            sourceMap = new HashMap<>();
+    public void addEdge(@NotNull Edge<ELabel, VLabel> edge) throws IllegalArgumentException {
+        final VLabel head = edge.head().label(), tail = edge.tail().label();
+        if(this.vertexMap.containsKey(head) && this.vertexMap.containsKey(tail)) {
+            Map<VLabel, Edge<ELabel, VLabel>> sourceMap = this.mapByHead.get(head);
+            if(sourceMap == null) {
+                sourceMap = new HashMap<>();
+            }
+            sourceMap.put(edge.tail().label(), edge);
+            this.mapByHead.replace(head, sourceMap);
+        } else {
+            throw new IllegalArgumentException("Head or tail of edge not contained in graph.");
         }
-        sourceMap.put(edge.tail().label(), edge);
-        this.mapByHead.replace(label, sourceMap);
+    }
+
+    /**
+     * Adds a new {@code Edge} to this {@code Graph}.
+     * @param label the {@code Edge} label.
+     * @param headV the label of the head {@code Vertex}.
+     * @param tailV the label of the tail {@code Vertex}.
+     * @throws IllegalArgumentException if either the {@code head} or {@code tail} is not
+     * contained in this {@code Graph}.
+     */
+    public void addEdge(ELabel label, VLabel headV, VLabel tailV) throws IllegalArgumentException {
+        final Vertex<VLabel, ELabel> head = this.vertexMap.get(headV);
+        final Vertex<VLabel, ELabel> tail = this.vertexMap.get(tailV);
+        if(head != null && tail != null) {
+            head.addNeighbor(tail, label);
+        } else {
+            throw new IllegalArgumentException("Head or tail of edge not contained in graph.");
+        }
     }
 
     /**
@@ -85,11 +117,11 @@ public class Graph<VLabel, ELabel> {
      * instead of the complete associated {@code Edge} object, it has to search
      * the entire {@code Graph} instead of pulling the head and tail directly
      * from a map. As such, this method is more useful when less information
-     * (e.g. only the label) is provided, but less useful when a faster search
+     * (e.g. only the label) is provided, but is less useful when a faster search
      * algorithm is desired.
      * @param edge the target {@code Edge} label.
      * @return {@code true} if an {@code Edge} with the provided head, tail, and
-     * label exists in this {@code Graph}, else {@code false}.
+     * label exists in this {@code Graph}, else {@code false} if no such edge exists.
      */
     public boolean containsEdge(@NotNull ELabel edge) {
         for(VLabel source : this.mapByHead.keySet()) {
@@ -143,17 +175,29 @@ public class Graph<VLabel, ELabel> {
      * Performs a depth-first search from a {@code Vertex} in this {@code Graph} and
      * records some subset of the {@code Vertices} traversed.
      * @param start the starting {@code Vertex}.
+     * @param ignore a set of all {@code Vertex} labels for which the algorithm should
+     *               ignore the associated {@code Vertex}. Essentially, any branch of
+     *               DFS stops at a {@code Vertex} if its label is in this {@code HashSet}.
      * @param recordStart {@code true} if this algorithm should record a {@code Vertex}
      *                                when it is first reached, else {@code false}.
      * @param recordLoop {@code true} if this algorithm should record a {@code Vertex}
      *                                 when it is reached in a loop, else {@code false}.
+     * @param recordPrev {@code true} if this algorithm should record the previous
+     *                               {@code Vertex} added to the {@code Stack} if
+     *                               discovered, else {@code false}.
+     * @param recordIgnore {@code true} if this algorithm should record a {@code Vertex}
+     *                                 if it is listed in the set of "ignore" labels,
+     *                                 else {@code false}.
      * @param recordEnd {@code true} if this algorithm should record a {@code Vertex}
      *                              when it is popped off the stack, else {@code false}.
      * @return the list of {@code Vertices} traversed according to the above specifications.
      */
     public List<VLabel> DFS(VLabel start,
+                            HashSet<VLabel> ignore,
                             boolean recordStart,
                             boolean recordLoop,
+                            boolean recordPrev,
+                            boolean recordIgnore,
                             boolean recordEnd) {
         final Stack<Vertex<VLabel, ELabel>> stack = new Stack<>();
         stack.push(this.vertexMap.get(start));
@@ -161,6 +205,8 @@ public class Graph<VLabel, ELabel> {
         checkStack.push(true);
         final List<VLabel> traversal = new ArrayList<>();
         final HashSet<VLabel> visited = new HashSet<>();
+        final Map<VLabel, VLabel> previousMap = new HashMap<>();
+        previousMap.put(start, null);
         while(! stack.isEmpty()) {
             final Vertex<VLabel, ELabel> cursor = stack.pop();
             final VLabel label = cursor.label();
@@ -172,14 +218,19 @@ public class Graph<VLabel, ELabel> {
                     traversal.add(label);
                 }
                 final Map<VLabel, Edge<ELabel, VLabel>> map = cursor.neighbors();
+                final VLabel previous = previousMap.get(label);
                 for(VLabel next : map.keySet()) {
-                    if(visited.contains(next)) {
-                        if(recordLoop) {
+                    if(recordPrev || ! next.equals(previous)) {
+                        if(recordPrev) {
                             traversal.add(next);
+                        } else if(visited.contains(next)) {
+                            if(recordLoop) {
+                                traversal.add(next);
+                            }
+                        } else if(recordIgnore || ! ignore.contains(next)) {
+                            stack.push(map.get(next).tail());
+                            checkStack.push(true);
                         }
-                    } else {
-                        stack.push(map.get(next).tail());
-                        checkStack.push(true);
                     }
                 }
             } else if(recordEnd) {
@@ -187,6 +238,31 @@ public class Graph<VLabel, ELabel> {
             }
         }
         return traversal;
+    }
+
+    /**
+     * Finds the number of cycles in this {@code Graph}.
+     * @param directed {@code true} if this algorithm should look for all directed
+     *                             cycles, else {@code false} if this algorithm should
+     *                             ignore cycles that return to the previous node.
+     * @return the number of unique {@code Paths} with the same head and tail.
+     */
+    public int numberOfCycles(boolean directed) {
+        final HashSet<VLabel> visited = new HashSet<>();
+        int count = 0;
+        for(VLabel origin : this.vertexMap.keySet()) {
+            if(! visited.contains(origin)) {
+                for(VLabel traversed : DFS(origin, visited, true, true,
+                        directed, false, false)) {
+                    if(visited.contains(traversed)) {
+                        count++;
+                    } else {
+                        visited.add(traversed);
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     /**
