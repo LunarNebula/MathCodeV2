@@ -15,21 +15,27 @@ public class Matrix implements TrueTextEncodable {
     private final Fraction[][] e;
 
     /**
-     * Creates a new, empty Matrix
+     * Creates a new, empty {@code Matrix}.
      */
     public Matrix() {
         this.e = new Fraction[0][];
     }
 
     /**
-     * Creates a new Matrix
-     * @param v the set of Vectors composing the rows of the Matrix
+     * Creates a new {@code Matrix}.
+     * @param isColumn {@code true} if each {@code Vector} represents a column in the {@code Matrix},
+     *                          else {@code false} if each {@code Vector} represents a row.
+     * @param v the set of {@code Vectors} composing consecutive entries in the {@code Matrix}.
      */
-    public Matrix(Vector @NotNull ... v) {
-        this.e = new Fraction[v.length][];
+    public Matrix(boolean isColumn, Vector @NotNull ... v) {
+        Matrix model = new Matrix(v.length, v[0].dimension());
         for(int i = 0; i < v.length; i++) {
-            this.e[i] = v[i].getCoordinates();
+            model.e[i] = v[i].getCoordinates();
         }
+        if(isColumn) {
+            model = model.transpose();
+        }
+        this.e = model.e;
     }
 
     /**
@@ -191,15 +197,16 @@ public class Matrix implements TrueTextEncodable {
     public Matrix pow(int pow) throws IllegalDimensionException {
         verifySquareMatrix();
         Matrix antilogarithm = identityMatrix(this.e.length);
-        int powTest = Math.abs(pow);
-        List<Boolean> powers = new LinkedList<>();
+        int powTest = Math.abs(pow), index = 0;
+        boolean[] powers = new boolean[Integer.SIZE];
         while(powTest > 0) {
-            powers.add(0, (powTest & 1) == 1);
+            powers[index++] = (powTest & 1) == 1;
             powTest >>>= 1;
         }
-        for(boolean instruction : powers) {
+        while(index > 0) {
+            index--;
             antilogarithm = antilogarithm.multiply(antilogarithm);
-            if(instruction) {
+            if(powers[index]) {
                 antilogarithm = multiply(antilogarithm);
             }
         }
@@ -550,24 +557,30 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Finds the rank of this Matrix
-     * @return the number of linearly independent nonzero rows in this Matrix
+     * Finds the rank of this {@code Matrix}.
+     * @return the number of linearly independent rows in this {@code Matrix}.
      */
     public int rank() {
-        final Matrix rowEchelon = rowEchelon();
-        int rank = this.e.length, column = 0;
-        while(rank > 0) {
-            if(rowEchelon.e[rank - 1][column].equals(Fraction.ZERO)) {
-                column++;
-                if(column == this.e.length) {
-                    column = 0;
-                    rank--;
-                }
-            } else {
-                return rank;
+        return rank(false);
+    }
+
+    /**
+     * Finds the rank of this {@code Matrix}.
+     * @param isEchelon {@code true} if the {@code Matrix} is already in row echelon
+     *                              form or an equivalent, else {@code false}.
+     * @return the number of linearly independent rows in this {@code Matrix}.
+     */
+    private int rank(boolean isEchelon) {
+        final Matrix rowEchelon = isEchelon ? this : rowEchelon();
+        int row = 0, column = 0;
+        final int rowLimit = rowEchelon.e.length, columnLimit = rowEchelon.columnSize(0);
+        while(row < rowLimit & column < columnLimit) {
+            if(! rowEchelon.e[row][column].equals(Fraction.ZERO)) {
+                row++;
             }
+            column++;
         }
-        return 0;
+        return row;
     }
 
     /**
@@ -603,17 +616,100 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Finds the null space of this {@code Matrix}.
-     * @return an array of {@code Vectors} forming a basis for this {@code Matrix}.
+     * Finds a basis for this {@code Matrix} using its rows or columns.
+     * @param isColumn {@code true} if the desired basis should use column
+     *                             {@code Vectors}, else {@code false} if the basis
+     *                             should use row {@code Vectors}.
+     * @return an array containing all indices of basis {@code Vectors} and an array
+     * with all other {@code Vectors}.
      */
-    public List<Vector> nullSpace() {
-        Matrix reducedRowEchelon = reducedRowEchelon();
-        return null;
+    public int[][] basis(boolean isColumn) {
+        return basis(isColumn, false);
     }
 
-    public List<Vector> getColumns() {
-        //List<Vector>
-        return null;
+    /**
+     * Finds a basis for the column space of this {@code Matrix}.
+     * @return an array of {@code Vectors} [index 0] containing a column basis for
+     * this {@code Matrix} and an array of {@code Vectors} containing all
+     * removed column {@code Vectors}.
+     */
+    private int[][] basis(boolean isColumn, boolean isEchelon) {
+        final Matrix flip = isColumn ? this : transpose();
+        final Matrix echelon = isEchelon ? flip : flip.rowEchelon();
+        final int rows = echelon.e.length, columns = columnSize(0);
+        final int rank = echelon.rank(true);
+        final int[][] basis = {new int[rank], new int[columns - rank]};
+        for(int i = 0; i < basis[1].length; i++) {
+            basis[1][i] = i + rank;
+        }
+        int row = 0, column = 0, fixedIndex = 0, freeIndex = 0;
+        while(row < rows & column < columns) {
+            if(echelon.e[row][column].equals(Fraction.ZERO)) {
+                basis[1][freeIndex++] = column;
+            } else {
+                basis[0][fixedIndex++] = column;
+                row++;
+            }
+            column++;
+        }
+        return basis;
+    }
+
+    /**
+     * Finds the null space of this {@code Matrix}.
+     * @return an array of {@code Vectors} forming a basis for the null space of
+     * this {@code Matrix}.
+     */
+    public Vector[] nullSpace() {
+        final Matrix reducedRowEchelon = reducedRowEchelon();
+        final int columns = columnSize(0);
+        final int[] indices = reducedRowEchelon.basis(true, true)[1];
+        final Vector[] nullSpace = new Vector[indices.length];
+        for(int i = 0; i < nullSpace.length; i++) {
+            nullSpace[i] = new Vector(columns);
+        }
+        int referenceIndex = 0, referenceRow = 0;
+        for(int i = 0; i < columns & referenceIndex < nullSpace.length; i++) {
+            if(indices[referenceIndex] == i) {
+                nullSpace[referenceIndex++].setElement(i, Fraction.ONE);
+            } else {
+                for(int j = referenceIndex; j < nullSpace.length; j++) {
+                    nullSpace[j].setElement(i,
+                            reducedRowEchelon.e[referenceRow][indices[j]].negate());
+                }
+                referenceRow++;
+            }
+        }
+        return nullSpace;
+    }
+
+    /**
+     * Returns a specified row of this {@code Matrix} as a {@code Vector}.
+     * @param row the index of the target row.
+     * @return the elements in the row as a {@code Vector}.
+     */
+    public Vector getRow(int row) {
+        return new Vector(this.e[row]);
+    }
+
+    /**
+     * Provides all rows of this {@code Matrix} as separate entities.
+     * @return an array of {@code Vectors}, with each {@code Vector} a separate row.
+     */
+    public Vector[] getRows() {
+        final Vector[] rows = new Vector[this.e.length];
+        for(int i = 0; i < rows.length; i++) {
+            rows[i] = getRow(i);
+        }
+        return rows;
+    }
+
+    /**
+     * Provides all columns of this {@code Matrix} as separate entities.
+     * @return an array of {@code Vectors}, with each {@code Vector} a separate column.
+     */
+    public Vector[] getColumns() {
+        return transpose().getRows();
     }
 
     /**
@@ -720,7 +816,10 @@ public class Matrix implements TrueTextEncodable {
      * @return the column size.
      */
     public int columnSize(int row) {
-        return this.e[row].length; //TODO: fix for index error
+        if(row < 0 || row >= this.e.length) {
+            throw new IllegalDimensionException(IllegalDimensionException.MATRIX_ELEMENT_OUT_OF_BOUNDS);
+        }
+        return this.e[row].length;
     }
 
     /**
@@ -857,8 +956,8 @@ public class Matrix implements TrueTextEncodable {
     /**
      * Checks if two {@code Matrices} cannot be added.
      * @param addend the addend Matrix
-     * @return {@code true} if the row and column lengths do not match between this
-     * {@code Matrix} and the comparator, else {@code false}.
+     * @throws IllegalDimensionException if the row and column lengths do not match
+     * between this {@code Matrix} and the comparator.
      */
     private void verifyAdditionDimensions(Matrix addend) {
         if(this.e.length != addend.e.length) {
