@@ -28,5 +28,6 @@ public class Test {
         final Matrix matrix = new Matrix("2,4,6,8;1,3,0,5;1,1,6,3");
         matrix.print();
         Vector.print(matrix.nullSpace());
+        Vector.print(matrix.basis(false));
     }
 }
