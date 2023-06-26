@@ -5,20 +5,40 @@ import Algebra.Matrix;
 import Exception.*;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
+/**
+ * Stores a {@code Vector} object that can represent any of the following:
+ * <ul>
+ *     <li>A coordinate point.</li>
+ *     <li>A movement in a coordinate space.</li>
+ *     <li>A row or column of a {@code Matrix}.</li>
+ *     <li>An arbitrary set of numbers.</li>
+ * </ul>
+ * @see Matrix
+ */
 public class Vector {
     private Fraction[] coordinates;
 
     /**
-     * Creates a new Vector
+     * Creates a new, empty {@code Vector}.
      */
     public Vector() {
         this.coordinates = new Fraction[0];
     }
 
     /**
-     * Creates a new Vector with given dimensions
-     * @param f the array of dimensions
+     * Creates a new {@code Vector} equal to the zero {@code Vector}.
+     * @param size the length of the {@code Vector}.
+     */
+    public Vector(int size) {
+        this.coordinates = new Fraction[size];
+        Arrays.fill(this.coordinates, Fraction.ZERO);
+    }
+
+    /**
+     * Creates a new {@code Vector} with given dimensions.
+     * @param f the array of dimensions.
      */
     public Vector(Fraction... f) {
         this.coordinates = f;
@@ -70,7 +90,7 @@ public class Vector {
         if(row < 0 | row >= m.rowSize()) {
             throw new IllegalDimensionException(IllegalDimensionException.UNEQUAL_VECTOR_DIMENSION);
         }
-        //
+        this.coordinates = m.getRow(row).coordinates;
     }
 
     /**
@@ -83,6 +103,16 @@ public class Vector {
         for(int i = 0; i < bigInts.length; i++) {
             this.coordinates[i] = new Fraction(bigInts[i]);
         }
+    }
+
+    /**
+     * Sets the element at a specified position in the {@code Vector} to a new value.
+     * @param i the target index.
+     * @param e the new element.
+     */
+    public void setElement(int i, Fraction e) {
+        verifyIndex(i);
+        this.coordinates[i] = e;
     }
 
     /**
@@ -179,6 +209,19 @@ public class Vector {
     }
 
     /**
+     * Verifies that a specified index requested for this {@code Vector} falls within
+     * the bounds of this {@code Vector}.
+     * @param index the target index.
+     * @throws IllegalDimensionException if the index is negative or at least the size
+     * of the interior {@code Vector} array.
+     */
+    private void verifyIndex(int index) {
+        if(index < 0 | index >= this.coordinates.length) {
+            throw new IllegalDimensionException(IllegalDimensionException.VECTOR_ELEMENT_OUT_OF_BOUNDS);
+        }
+    }
+
+    /**
      * Determines whether this {@code Vector} is the zeor vector.
      * @return {@code true} if all elements of this {@code Vector} are zero, else {@code false}
      * if at least one element is nonzero.
@@ -243,10 +286,10 @@ public class Vector {
     }
 
     /**
-     * Prints this Vector
+     * Prints this {@code Vector}.
      */
     public void print() {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     // static methods
@@ -295,7 +338,8 @@ public class Vector {
      * @throws IllegalDimensionException if not all {@code Vectors} have the same dimension.
      */
     public static boolean areLinearlyDependent(Vector... vectors) throws IllegalDimensionException {
-        return (verifySameDimension(vectors) < vectors.length) | (new Matrix(vectors).rank() < vectors.length);
+        return (verifySameDimension(vectors) < vectors.length) |
+                (new Matrix(false, vectors).rank() < vectors.length);
     }
 
     /**
@@ -324,9 +368,7 @@ public class Vector {
      */
     public static Vector ZERO(int n) {
         final Fraction[] nullVector = new Fraction[n];
-        for(int i = 0; i < n; i++) {
-            nullVector[i] = Fraction.ZERO;
-        }
+        Arrays.fill(nullVector, Fraction.ZERO);
         return new Vector(nullVector);
     }
 
