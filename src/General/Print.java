@@ -61,10 +61,39 @@ public class Print {
     }
 
     /**
-     * Prints an array of Matrices
-     * @param m the array of Matrices
+     * Prints an array of {@code Matrices}.
+     * @param m the array of {@code Matrices}.
      */
     public static void print(Matrix... m) {
         System.out.println(toString(m));
+    }
+
+    /**
+     * Converts a 2D array of integers to a printable format.
+     * @param n the array.
+     * @return the array of integers as a {@code String}.
+     */
+    public static String toString(int[]... n) {
+        final StringBuilder builder = new StringBuilder();
+        String rowDelimiter = "";
+        for(int[] row : n) {
+            String delimiter = "";
+            builder.append(rowDelimiter).append("[");
+            rowDelimiter = "\n";
+            for(int i : row) {
+                builder.append(delimiter).append(i);
+                delimiter = ", ";
+            }
+            builder.append("]");
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Prints a 2D array of integers.
+     * @param n the array.
+     */
+    public static void print(int[]... n) {
+        System.out.println(toString(n));
     }
 }

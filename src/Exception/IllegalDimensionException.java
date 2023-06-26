@@ -11,6 +11,8 @@ public class IllegalDimensionException extends IllegalArgumentException {
             "Element-wise computations cannot be performed on matrices with the given dimensions.";
     public static String MATRIX_DOT_PRODUCT_ILLEGAL =
             "Dot-product computations cannot be performed on matrices with the given dimensions.";
+    public static String VECTOR_ELEMENT_OUT_OF_BOUNDS =
+            "The requested index requires access to an element not within the bounds of this Vector.";
     public static String MATRIX_ELEMENT_OUT_OF_BOUNDS =
             "The requested index requires access to an element not within the bounds of this Matrix.";
     public static String NON_RECTANGULAR_MATRIX =

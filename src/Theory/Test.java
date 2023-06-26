@@ -1,6 +1,8 @@
 package Theory;
 
+import Algebra.Matrix;
 import General.Timer;
+import Geometry.Vector;
 
 public class Test {
     /**
@@ -23,5 +25,8 @@ public class Test {
      * @throws Exception if an <code>Exception</code> occurs in the test
      */
     public static void test() throws Exception {
+        final Matrix matrix = new Matrix("2,4,6,8;1,3,0,5;1,1,6,3");
+        matrix.print();
+        Vector.print(matrix.nullSpace());
     }
 }
