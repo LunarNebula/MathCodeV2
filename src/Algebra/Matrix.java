@@ -620,20 +620,19 @@ public class Matrix implements TrueTextEncodable {
      * @param isColumn {@code true} if the desired basis should use column
      *                             {@code Vectors}, else {@code false} if the basis
      *                             should use row {@code Vectors}.
-     * @return an array containing all indices of basis {@code Vectors} and an array
-     * with all other {@code Vectors}.
+     * @return an array containing all basis {@code Vectors}.
      */
-    public int[][] basis(boolean isColumn) {
-        return basis(isColumn, false);
+    public Vector[] basis(boolean isColumn) {
+        return (isColumn ? transpose() : this).getRows(pivots(true, false)[0]);
     }
 
     /**
-     * Finds a basis for the column space of this {@code Matrix}.
-     * @return an array of {@code Vectors} [index 0] containing a column basis for
-     * this {@code Matrix} and an array of {@code Vectors} containing all
-     * removed column {@code Vectors}.
+     * Finds all pivots and non-pivots for the column space of this {@code Matrix}.
+     * @return an array of ints [index 0] containing all indices of columns {@code Vectors}
+     * in a column basis for this {@code Matrix} and an array of ints designating all
+     * other column {@code Vectors}.
      */
-    private int[][] basis(boolean isColumn, boolean isEchelon) {
+    private int[][] pivots(boolean isColumn, boolean isEchelon) {
         final Matrix flip = isColumn ? this : transpose();
         final Matrix echelon = isEchelon ? flip : flip.rowEchelon();
         final int rows = echelon.e.length, columns = columnSize(0);
@@ -663,7 +662,7 @@ public class Matrix implements TrueTextEncodable {
     public Vector[] nullSpace() {
         final Matrix reducedRowEchelon = reducedRowEchelon();
         final int columns = columnSize(0);
-        final int[] indices = reducedRowEchelon.basis(true, true)[1];
+        final int[] indices = reducedRowEchelon.pivots(true, true)[1];
         final Vector[] nullSpace = new Vector[indices.length];
         for(int i = 0; i < nullSpace.length; i++) {
             nullSpace[i] = new Vector(columns);
@@ -693,6 +692,19 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
+     * Returns a specific set of rows from this {@code Matrix}.
+     * @param indices the indices of each row.
+     * @return an array of rows as {@code Vectors}.
+     */
+    public Vector[] getRows(int... indices) {
+        final Vector[] rows = new Vector[indices.length];
+        for(int i = 0; i < indices.length; i++) {
+            rows[i] = this.getRow(indices[i]);
+        }
+        return rows;
+    }
+
+    /**
      * Provides all rows of this {@code Matrix} as separate entities.
      * @return an array of {@code Vectors}, with each {@code Vector} a separate row.
      */
@@ -702,6 +714,15 @@ public class Matrix implements TrueTextEncodable {
             rows[i] = getRow(i);
         }
         return rows;
+    }
+
+    /**
+     * Returns a specific set of columns from this {@code Matrix}.
+     * @param indices the indices of each column.
+     * @return an array of columns as {@code Vectors}.
+     */
+    public Vector[] getColumns(int... indices) {
+        return transpose().getColumns();
     }
 
     /**
@@ -971,9 +992,10 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Checks if two Matrices cannot be multiplied
-     * @param multiplicand the multiplicand Matrix
-     * TODO: include exception thrown
+     * Checks if two Matrices cannot be multiplied.
+     * @param multiplicand the multiplicand Matrix.
+     * @throws IllegalDimensionException if the dimensions of the two {@code Matrices}
+     * are not suitable for multiplication.
      */
     private void verifyMultiplicationDimensions(Matrix multiplicand) {
         verifyRectangularMatrix();
@@ -984,12 +1006,12 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Checks if this Matrix is not rectangular
-     * TODO: include exception thrown
+     * Verifies that this {@code Matrix} is rectangular.
+     * @throws IllegalDimensionException if this {@code Matrix} is jagged.
      */
     public void verifyRectangularMatrix() {
         if(this.e.length != 0) {
-            int length = this.e[0].length;
+            final int length = this.e[0].length;
             for(Fraction[] row : this.e) {
                 if(row.length != length) {
                     throw new IllegalDimensionException(IllegalDimensionException.NON_RECTANGULAR_MATRIX);
@@ -999,8 +1021,8 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
-     * Checks if this Matrix is not square
-     * TODO: include exception thrown
+     * Verifies that this Matrix is square.
+     * @throws IllegalDimensionException if this {@code Matrix} is not square.
      */
     public void verifySquareMatrix() {
         for(Fraction[] row : this.e) {
