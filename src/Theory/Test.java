@@ -1,6 +1,7 @@
 package Theory;
 
 import Algebra.Matrix;
+import Enumerator.UnsignedInt;
 import General.Timer;
 import Geometry.Vector;
 
@@ -25,9 +26,11 @@ public class Test {
      * @throws Exception if an <code>Exception</code> occurs in the test
      */
     public static void test() throws Exception {
-        final Matrix matrix = new Matrix("2,4,6,8;1,3,0,5;1,1,6,3");
-        matrix.print();
-        Vector.print(matrix.nullSpace());
-        Vector.print(matrix.basis(false));
+        final UnsignedInt a = new UnsignedInt("00001011");
+        final UnsignedInt b = new UnsignedInt("00011011");
+        a.print();
+        b.print();
+        a.multiply(b).print();
+        b.multiply(a).print();
     }
 }

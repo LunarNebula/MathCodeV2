@@ -2,6 +2,7 @@ package Enumerator;
 
 import Algebra.BooleanOperable;
 import Exception.*;
+import General.Print;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +23,30 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * Creates a new UnsignedInt from an array of bits (as booleans)
      * @param bits the bit array
      */
-    private UnsignedInt(boolean[] bits) {
+    private UnsignedInt(boolean... bits) {
         this.bits = bits;
+    }
+
+    /**
+     * Creates a new {@code UnsignedInt} from a binary string.
+     * @param s the {@code String}.
+     * @throws IllegalArgumentException if the input {@code String} contains
+     * digits other than 0 or 1.
+     */
+    public UnsignedInt(String s) {
+        this.bits = new boolean[s.length()];
+        final char[] digits = s.toCharArray();
+        int index = this.bits.length;
+        for(int i = 0; i < this.bits.length; i++) {
+            index--;
+            if(digits[i] == '0') {
+                this.bits[index] = false;
+            } else if(digits[i] == '1') {
+                this.bits[index] = true;
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
     }
 
     /**
@@ -88,8 +111,27 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     public UnsignedInt multiply(@NotNull UnsignedInt multiplicand) throws IllegalArgumentException {
         final boolean[] nextBits = new boolean[this.bits.length];
         verifyBitEquality(nextBits.length, multiplicand.bits.length);
+        for(int i = 0; i < nextBits.length; i++) {
+            boolean carry = false;
+            final int limit = nextBits.length - i;
+            if(this.bits[i]) {
+                for(int j = 0; j < limit; j++) {
+                    final boolean digit = nextBits[i + j] ^ multiplicand.bits[j] ^ carry;
+                    carry = (((carry | nextBits[i + j]) & multiplicand.bits[j]) | (carry & nextBits[i + j]));
+                    nextBits[i + j] = digit;
+                }
+            }
+        }
         return new UnsignedInt(nextBits);
     } //TODO: write this method
+
+    public void print(boolean... b) {
+        final StringBuilder builder = new StringBuilder();
+        for(int i = b.length - 1; i >= 0; i--) {
+            builder.append(b[i] ? '1' : '0');
+        }
+        System.out.println(builder);
+    }
 
     /**
      * Shifts this UnsignedInt a particular number of bits to the left
