@@ -1,9 +1,6 @@
 package Theory;
 
-import Algebra.Matrix;
-import Enumerator.UnsignedInt;
 import General.Timer;
-import Geometry.Vector;
 
 public class Test {
     /**
@@ -26,11 +23,5 @@ public class Test {
      * @throws Exception if an <code>Exception</code> occurs in the test
      */
     public static void test() throws Exception {
-        final UnsignedInt a = new UnsignedInt("00001011");
-        final UnsignedInt b = new UnsignedInt("00011011");
-        a.print();
-        b.print();
-        a.multiply(b).print();
-        b.multiply(a).print();
     }
 }
