@@ -252,7 +252,12 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             exp >>>= 1;
         }
         boolean[] nextBits = new boolean[this.bits.length];
-        nextBits[0] = true;
+        if(index == 0) {
+            nextBits[0] = true;
+            return new UnsignedInt(nextBits);
+        }
+        index--;
+        System.arraycopy(this.bits, 0, nextBits, 0, nextBits.length);
         while(index > 0) {
             index--;
             nextBits = square(nextBits);
@@ -261,6 +266,53 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             }
         }
         return new UnsignedInt(nextBits);
+    }
+
+    /**
+     * Finds the quotient and remainder of this {@code UnsignedInt} and another,
+     * specified {@code UnsignedInt}.
+     * @param divisor the divisor.
+     * @return an array of {@code UnsignedInts} with {@code (this / divisor)} at index
+     * {@code 0} and {@code (this % remainder)} at index {@code 1}.
+     */
+    public UnsignedInt[] divideAndRemainder(UnsignedInt divisor) {
+        final int length = divisor.bits.length, lastIndex = length - 1;
+        verifyBitEquality(this.bits.length, length);
+        final boolean[] quotientBits = new boolean[length];
+        final boolean[] remainderBits = new boolean[length];
+        System.arraycopy(this.bits, 0, remainderBits, 0, length);
+        int dividendIndex = lastIndex, divisorIndex = lastIndex;
+        while(divisorIndex >= 0 && ! divisor.bits[divisorIndex]) {
+            divisorIndex--;
+        }
+        if(divisorIndex < 0) {
+            throw new ArithmeticException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
+        }
+        while(dividendIndex >= 0 && ! remainderBits[dividendIndex]) {
+            dividendIndex--;
+        }
+        while(dividendIndex >= divisorIndex) {
+            final int startIndex = dividendIndex - divisorIndex;
+            int digitCopyIndex = startIndex;
+            final boolean[] newRemainder = new boolean[divisorIndex + 1];
+            boolean carry = false;
+            for(int i = 0; i < newRemainder.length; i++) {
+                newRemainder[i] = remainderBits[digitCopyIndex] ^ divisor.bits[i] ^ carry;
+                carry = ((carry || divisor.bits[i]) && !remainderBits[digitCopyIndex]) ||
+                        (carry & remainderBits[digitCopyIndex] & divisor.bits[i]);
+                digitCopyIndex++;
+            }
+            if((! carry) || (dividendIndex < lastIndex && remainderBits[dividendIndex + 1])) {
+                if(carry) {
+                    remainderBits[dividendIndex + 1] = false;
+                }
+                System.arraycopy(newRemainder, 0, remainderBits,
+                        startIndex, newRemainder.length);
+                quotientBits[startIndex] = true;
+            }
+            dividendIndex--;
+        }
+        return new UnsignedInt[]{new UnsignedInt(quotientBits), new UnsignedInt(remainderBits)};
     }
 
     /**
