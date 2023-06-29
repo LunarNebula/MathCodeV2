@@ -275,14 +275,27 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * @return an array of {@code UnsignedInts} with {@code (this / divisor)} at index
      * {@code 0} and {@code (this % remainder)} at index {@code 1}.
      */
-    public UnsignedInt[] divideAndRemainder(UnsignedInt divisor) {
-        final int length = divisor.bits.length, lastIndex = length - 1;
-        verifyBitEquality(this.bits.length, length);
+    public UnsignedInt[] divideAndRemainder(@NotNull UnsignedInt divisor) {
+        verifyBitEquality(this.bits.length, divisor.bits.length);
+        final boolean[][] bits = divideAndRemainder(this.bits, divisor.bits);
+        return new UnsignedInt[]{new UnsignedInt(bits[0]), new UnsignedInt(bits[1])};
+    }
+
+    /**
+     * Computes the quotient and remainder of two numbers represented as bit arrays.
+     * @param dividend the dividend value.
+     * @param divisor the divisor value.
+     * @return an array containing two bit arrays, that at index {@code 0} designating
+     * a binary value equal to {@code dividend / divisor} and that at index {@code 1}
+     * designating {@code dividend % divisor}.
+     */
+    private static boolean[] [] divideAndRemainder(boolean[] dividend, boolean[] divisor) {
+        final int length = divisor.length, lastIndex = length - 1;
         final boolean[] quotientBits = new boolean[length];
         final boolean[] remainderBits = new boolean[length];
-        System.arraycopy(this.bits, 0, remainderBits, 0, length);
+        System.arraycopy(dividend, 0, remainderBits, 0, length);
         int dividendIndex = lastIndex, divisorIndex = lastIndex;
-        while(divisorIndex >= 0 && ! divisor.bits[divisorIndex]) {
+        while(divisorIndex >= 0 && ! divisor[divisorIndex]) {
             divisorIndex--;
         }
         if(divisorIndex < 0) {
@@ -297,9 +310,9 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             final boolean[] newRemainder = new boolean[divisorIndex + 1];
             boolean carry = false;
             for(int i = 0; i < newRemainder.length; i++) {
-                newRemainder[i] = remainderBits[digitCopyIndex] ^ divisor.bits[i] ^ carry;
-                carry = ((carry || divisor.bits[i]) && !remainderBits[digitCopyIndex]) ||
-                        (carry & remainderBits[digitCopyIndex] & divisor.bits[i]);
+                newRemainder[i] = remainderBits[digitCopyIndex] ^ divisor[i] ^ carry;
+                carry = ((carry || divisor[i]) && !remainderBits[digitCopyIndex]) ||
+                        (carry & remainderBits[digitCopyIndex] & divisor[i]);
                 digitCopyIndex++;
             }
             if((! carry) || (dividendIndex < lastIndex && remainderBits[dividendIndex + 1])) {
@@ -312,7 +325,33 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             }
             dividendIndex--;
         }
-        return new UnsignedInt[]{new UnsignedInt(quotientBits), new UnsignedInt(remainderBits)};
+        return new boolean[][]{quotientBits, remainderBits};
+    }
+
+    /**
+     * Finds the greatest common divisor of this {@code UnsignedInt} and another,
+     * specified {@code UnsignedInt}.
+     * @param n the other specified value.
+     * @return an {@code UnsignedInt} of the greatest positive integer value {@code g}
+     * satisfying {@code (g | this)} and {@code (g | n)}.
+     */
+    public UnsignedInt gcd(@NotNull UnsignedInt n) {
+        final int length = this.bits.length;
+        verifyBitEquality(length, n.bits.length);
+        boolean[] a = new boolean[length], b = new boolean[length];
+        System.arraycopy(this.bits, 0, a, 0, length);
+        System.arraycopy(n.bits, 0, b, 0, length);
+        if(compareTo(a, b) > 0) {
+            final boolean[] switcher = a;
+            a = b;
+            b = switcher;
+        }
+        while(! isZero(a)) {
+            final boolean[] modulus = divideAndRemainder(b, a)[1];
+            b = a;
+            a = modulus;
+        }
+        return new UnsignedInt(b);
     }
 
     /**
@@ -462,6 +501,28 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Determines whether this {@code UnsignedInt} is a zero value.
+     * @return {@code true} if any bits of this {@code UnsignedInt} are flipped, else {@code false}.
+     */
+    public boolean isZero() {
+        return isZero(this.bits);
+    }
+
+    /**
+     * Determines whether a specified bit array designates a zero value.
+     * @param bits the bit array.
+     * @return {@code true} if no bits in the array are flipped, else {@code false}.
+     */
+    private static boolean isZero(boolean[] bits) {
+        for(boolean b : bits) {
+            if(b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Compares this {@code UnsignedInt} to another, specified {@code UnsignedInt}.
      * @param o the comparator {@code UnsignedInt}.
      * @return {@code 0} if the two values are identical, else {@code 1} if
@@ -472,9 +533,20 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     @Override
     public int compareTo(@NotNull UnsignedInt o) throws IllegalArgumentException {
         verifyBitEquality(this.bits.length, o.bits.length);
-        for(int i = this.bits.length - 1; i >= 0; i--) {
-            if(this.bits[i] ^ o.bits[i]) {
-                return this.bits[i] ? 1 : -1;
+        return compareTo(this.bits, o.bits);
+    }
+
+    /**
+     * Finds a comparison between two numbers represented by bit arrays.
+     * @param a the first number.
+     * @param b the second number.
+     * @return {@code 1} if {@code a > b}, else {@code 0} if {@code a = b},
+     * else {@code -1} when {@code a < b}.
+     */
+    private static int compareTo(boolean[] a, boolean[] b) {
+        for(int i = a.length - 1; i >= 0; i--) {
+            if(a[i] ^ b[i]) {
+                return a[i] ? 1 : -1;
             }
         }
         return 0;
