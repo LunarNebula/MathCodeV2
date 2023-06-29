@@ -361,18 +361,26 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * @return the shifted {@code UnsignedInt}.
      */
     public UnsignedInt shift(int shift) {
-        final boolean[] nextBits = new boolean[this.bits.length];
-        int index = 0, nextIndex = shift;
-        if(shift < 0) {
-            index = -shift;
-            nextIndex = 0;
+        return new UnsignedInt(shift(this.bits, shift));
+    }
+
+    /**
+     * Performs a bit-shift on a bit array representing a binary value.
+     * @param bits the bit array.
+     * @param shift the shift amount. If {@code shift > 0}, then the bits will be moved
+     *              {@code shift} steps to the left (for a value greater than or equal
+     *              to the previous). If {@code shift < 0}, then the bits will be moved
+     *              {@code (-shift)} steps to the right.
+     * @return the shifted binary array.
+     */
+    private static boolean[] shift(boolean[] bits, int shift) {
+        final boolean[] nextBits = new boolean[bits.length];
+        if(shift > 0) {
+            System.arraycopy(bits, 0, nextBits, shift, nextBits.length - shift);
+        } else {
+            System.arraycopy(bits, -shift, nextBits, 0, nextBits.length + shift);
         }
-        while(index < nextBits.length & nextIndex < nextBits.length) {
-            nextBits[nextIndex] = this.bits[index];
-            index++;
-            nextIndex++;
-        }
-        return new UnsignedInt(nextBits);
+        return nextBits;
     }
 
     /**
