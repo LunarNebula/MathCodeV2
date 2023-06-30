@@ -1,18 +1,38 @@
 package Enumerator;
 
 import Algebra.BooleanOperable;
+import DataSet.BST;
 import Exception.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Stores an unsigned binary integer of a set size. The role of this class object is to
+ * behave like {@code Integer} or {@code Long}, with the caveat that the size of the value
+ * represented can be chosen by the programmer (i.e. without the restriction to 32 or 64 bits).
+ * {@code UnsignedInt} objects exhibit any {@code Integer}-available arithmetic operations
+ * with other {@code UnsignedInt} objects of the same bit capacity (or "bits" array length).
+ * Attempting to perform operations on two {@code UnsignedInt} values of different capacities
+ * will result in the program's throwing an {@link IllegalArgumentException}. However, an
+ * {@code UnsignedInt} can be converted to an equivalent one of different length using the
+ * "resize" method. Other methods for basic factorization have also been added.
+ * @see Integer
+ * @see Long
+ */
 public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<UnsignedInt> {
     private final boolean[] bits;
     private final int hashCode;
+    private List<UnsignedInt> factors;
 
     /**
-     * Creates a new UnsignedInt with a specified bit maximum
-     * @param bits the number of bits allocated to this UnsignedInt
-     * @throws IllegalArgumentException if the number of bits given is
+     * Creates a new {@code UnsignedInt} equal to zero and with a specified bit maximum.
+     * @param bits the number of bits allocated to this {@code UnsignedInt}.
+     * @throws IllegalArgumentException if the number of bits given is negative.
      */
     public UnsignedInt(int bits) throws IllegalArgumentException {
         verifyBitLegality(bits);
@@ -21,8 +41,8 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Creates a new UnsignedInt from an array of bits (as booleans)
-     * @param bits the bit array
+     * Creates a new {@code UnsignedInt} from an array of bits (as booleans).
+     * @param bits the bit array.
      */
     private UnsignedInt(boolean... bits) {
         this.bits = bits;
@@ -30,10 +50,35 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Creates a new {@code UnsignedInt} from a specified bit capacity and initial value.
+     * @param bits the number of bits.
+     * @param value the initial value.
+     */
+    public UnsignedInt(int bits, int value) {
+        this.bits = toBinaryArray(bits, value);
+        this.hashCode = computeHashcode();
+    }
+
+    /**
+     * Creates a new binary array with a specified bit capacity and initial binary value.
+     * @param bits the capacity.
+     * @param value the initial value.
+     * @return the converted bit array.
+     */
+    private static boolean[] toBinaryArray(int bits, int value) {
+        final boolean[] nextBits = new boolean[bits];
+        for(int i = 0; i < bits && value != 0; i++) {
+            nextBits[i] = ((1 & value) != 0);
+            value >>>= 1;
+        }
+        return nextBits;
+    }
+
+    /**
      * Creates a new {@code UnsignedInt} from a binary string.
      * @param s the {@code String}.
      * @throws IllegalArgumentException if the input {@code String} contains
-     * digits other than 0 or 1.
+     * digits other than {@code 0} or {@code 1}.
      */
     public UnsignedInt(String s) {
         this.bits = new boolean[s.length()];
@@ -389,15 +434,111 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * {@code (i+1)^2 > this}.
      */
     public UnsignedInt sqrt() {
-        boolean[] nextBits = new boolean[this.bits.length];
-        System.arraycopy(this.bits, 0, nextBits, 0, nextBits.length);
+        return new UnsignedInt(sqrt(this.bits));
+    }
+
+    /**
+     * Computes the integral square root of a binary number represented as a bit array.
+     * @param bits the target number.
+     * @return a bit array of the unique {@code UnsignedInt i} such that {@code i^2 <= this}
+     * and {@code (i+1)^2 > this}.
+     */
+    private static boolean[] sqrt(boolean... bits) {
+        boolean[] nextBits = new boolean[bits.length];
+        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
         boolean[] prevBits = nextBits, prevPrevBits;
         do {
             prevPrevBits = prevBits;
             prevBits = nextBits;
-            nextBits = shift(add(nextBits, divideAndRemainder(this.bits, nextBits)[0]), -1);
+            nextBits = shift(add(nextBits, divideAndRemainder(bits, nextBits)[0]), -1);
         } while(! equals(prevPrevBits, nextBits));
-        return new UnsignedInt(prevBits);
+        return prevBits;
+    }
+
+    /**
+     * Computes a list of prime factors for a number represented as a bit array.
+     * @param bits the target number.
+     * @return the list of all numbers {@code n} satisfying {@code (n | bits)}.
+     */
+    private static List<boolean[]> primeFactors(boolean... bits) {
+        final List<boolean[]> primeFactors = new ArrayList<>();
+        int nonZeroIndex = 0;
+        while(nonZeroIndex < bits.length && ! bits[nonZeroIndex]) {
+            nonZeroIndex++;
+        }
+        if(nonZeroIndex != bits.length) {
+            for(int i = 0; i < nonZeroIndex; i++) {
+                primeFactors.add(toBinaryArray(bits.length, 2));
+            }
+            bits = shift(bits, -nonZeroIndex);
+            boolean[] sqrt = sqrt(bits), divisor = toBinaryArray(bits.length, 3);
+            final boolean[] TWO = toBinaryArray(bits.length, 2);
+            while (compareTo(divisor, sqrt) <= 0) {
+                boolean recompute = false;
+                boolean[][] quotientRemainder = divideAndRemainder(bits, divisor);
+                while(isZero(quotientRemainder[1])) {
+                    final boolean[] digits = new boolean[bits.length];
+                    System.arraycopy(divisor, 0, digits, 0, bits.length);
+                    primeFactors.add(digits);
+                    bits = quotientRemainder[0];
+                    quotientRemainder = divideAndRemainder(bits, divisor);
+                    recompute = true;
+                }
+                if(recompute) {
+                    sqrt = sqrt(bits);
+                }
+                divisor = add(divisor, TWO);
+            }
+            if(compareTo(bits, toBinaryArray(bits.length, 1)) > 0) {
+                primeFactors.add(bits);
+            }
+        }
+        return primeFactors;
+    }
+
+    /**
+     * Finds all factors of this {@code UnsignedInt}.
+     * @return a list of all {@code n} such that {@code (n | this)}.
+     */
+    public List<UnsignedInt> factors() {
+        if(this.factors == null) {
+            final List<boolean[]> factors = factors(this.bits);
+            final List<UnsignedInt> proxyList = new ArrayList<>(factors.size());
+            for(boolean[] factor : factors) {
+                proxyList.add(new UnsignedInt(factor));
+            }
+            this.factors = new BST<>(proxyList).getOrderedList();
+        }
+        return new ArrayList<>(this.factors);
+    }
+
+    /**
+     * Computes all factors of a number represented as a bit array.
+     * @param bits the target number.
+     * @return a list of bit arrays representing all numbers that evenly divide
+     * the target value.
+     */
+    private static List<boolean[]> factors(boolean... bits) {
+        final List<boolean[]> primes = primeFactors(bits), factors = new ArrayList<>();
+        List<boolean[]> test = new ArrayList<>();
+        boolean[] prev = toBinaryArray(bits.length, 1);
+        boolean[] product = toBinaryArray(bits.length, 1);
+        factors.add(toBinaryArray(bits.length, 1));
+        for(boolean[] primeFactor : primes) {
+            if(equals(primeFactor, prev)) {
+                product = multiply(product, primeFactor);
+            } else {
+                factors.addAll(test);
+                prev = primeFactor;
+                test = new ArrayList<>();
+                product = primeFactor;
+            }
+            for(boolean[] factor : factors) {
+                test.add(multiply(factor, product));
+            }
+        }
+        factors.addAll(test);
+        return factors;
     }
 
     /**
@@ -523,6 +664,18 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      */
     public int bits() {
         return this.bits.length;
+    }
+
+    /**
+     * Resizes this {@code UnsignedInt} to a different bit capacity.
+     * @param size the new size.
+     * @return an equivalent {@code UnsignedInt} with a different bit array length. Note
+     * that choosing a smaller size for the array may cause some flipped bits to be lost.
+     */
+    public UnsignedInt resize(int size) {
+        final boolean[] nextBits = new boolean[size];
+        System.arraycopy(this.bits, 0, nextBits, 0, Math.min(size, this.bits.length));
+        return new UnsignedInt(nextBits);
     }
 
     /**
