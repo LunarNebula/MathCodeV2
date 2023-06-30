@@ -384,6 +384,23 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Computes the integral square root of this {@code UnsignedInt}.
+     * @return the unique {@code UnsignedInt i} such that {@code i^2 <= this} and
+     * {@code (i+1)^2 > this}.
+     */
+    public UnsignedInt sqrt() {
+        boolean[] nextBits = new boolean[this.bits.length];
+        System.arraycopy(this.bits, 0, nextBits, 0, nextBits.length);
+        boolean[] prevBits = nextBits, prevPrevBits;
+        do {
+            prevPrevBits = prevBits;
+            prevBits = nextBits;
+            nextBits = shift(add(nextBits, divideAndRemainder(this.bits, nextBits)[0]), -1);
+        } while(! equals(prevPrevBits, nextBits));
+        return new UnsignedInt(prevBits);
+    }
+
+    /**
      * Computes the {@code UnsignedInt} formed from taking a bitwise {@code AND}
      * function across this {@code UnsignedInt} and a comparator {@code UnsignedInt}.
      * @param o the comparator {@code BooleanSetOperable}.
@@ -584,8 +601,19 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         if(this.bits.length != convert.bits.length) {
             return false;
         }
-        for(int i = 0; i < this.bits.length; i++) {
-            if(this.bits[i] ^ convert.bits[i]) {
+        return equals(this.bits, convert.bits);
+    }
+
+    /**
+     * Determines whether two numbers represented as bit arrays are equal.
+     * @param a the first number.
+     * @param b the second number.
+     * @return {@code true} if each bit of {@code a} is equal to the corresponding
+     * bit of {@code b}, else {@code false} if at least one bit is different.
+     */
+    private static boolean equals(boolean[] a, boolean[] b) {
+        for(int i = 0; i < a.length; i++) {
+            if(a[i] ^ b[i]) {
                 return false;
             }
         }
