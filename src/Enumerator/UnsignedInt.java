@@ -24,7 +24,7 @@ import java.util.List;
 public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<UnsignedInt> {
     private final boolean[] bits;
     private final int hashCode;
-    private List<UnsignedInt> factors;
+    private final List<UnsignedInt> factors;
 
     /**
      * Creates a new {@code UnsignedInt} equal to zero and with a specified bit maximum.
@@ -35,6 +35,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         verifyBitLegality(bits);
         this.bits = new boolean[bits];
         this.hashCode = computeHashcode();
+        this.factors = new ArrayList<>();
     }
 
     /**
@@ -44,6 +45,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     private UnsignedInt(boolean... bits) {
         this.bits = bits;
         this.hashCode = computeHashcode();
+        this.factors = new ArrayList<>();
     }
 
     /**
@@ -55,6 +57,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         verifyBitLegality(bits);
         this.bits = toBinaryArray(bits, value);
         this.hashCode = computeHashcode();
+        this.factors = new ArrayList<>();
     }
 
     /**
@@ -78,6 +81,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             }
         }
         this.hashCode = computeHashcode();
+        this.factors = new ArrayList<>();
     }
 
     /**
@@ -228,13 +232,13 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * @return a list of all {@code n} such that {@code (n | this)}.
      */
     public List<UnsignedInt> factors() {
-        if(this.factors == null) {
+        if(this.factors.size() == 0) {
             final List<boolean[]> factors = factors(this.bits);
             final List<UnsignedInt> proxyList = new ArrayList<>(factors.size());
             for(boolean[] factor : factors) {
                 proxyList.add(new UnsignedInt(factor));
             }
-            this.factors = new BST<>(proxyList).getOrderedList();
+            this.factors.addAll(new BST<>(proxyList).getOrderedList());
         }
         return new ArrayList<>(this.factors);
     }
@@ -646,7 +650,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * a binary value equal to {@code dividend / divisor} and that at index {@code 1}
      * designating {@code dividend % divisor}.
      */
-    private static boolean[] [] divideAndRemainder(boolean[] dividend, boolean[] divisor) {
+    private static boolean[][] divideAndRemainder(boolean[] dividend, boolean[] divisor) {
         final int length = divisor.length, lastIndex = length - 1;
         final boolean[] quotientBits = new boolean[length];
         final boolean[] remainderBits = new boolean[length];
