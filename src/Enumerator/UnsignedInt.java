@@ -168,6 +168,17 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Finds the remainder when an integer power of this {@code UnsignedInt} is
+     * divided by a specified modulus.
+     * @param divisor the divisor.
+     * @param exp the integer power.
+     * @return {@code (this ^ exp) % divisor}
+     */
+    public UnsignedInt modPow(UnsignedInt divisor, int exp) {
+        return new UnsignedInt(modPow(this.bits, divisor.bits, exp));
+    }
+
+    /**
      * Finds the greatest common divisor of this {@code UnsignedInt} and another,
      * specified {@code UnsignedInt}.
      * @param n the other specified value.
@@ -613,15 +624,15 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         boolean[] nextBits = new boolean[bits.length];
         if(index == 0) {
             nextBits[0] = true;
-            return nextBits;
-        }
-        index--;
-        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
-        while(index > 0) {
+        } else {
             index--;
-            nextBits = square(nextBits);
-            if(pow[index]) {
-                nextBits = multiply(bits, nextBits);
+            System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
+            while(index > 0) {
+                index--;
+                nextBits = square(nextBits);
+                if(pow[index]) {
+                    nextBits = multiply(bits, nextBits);
+                }
             }
         }
         return nextBits;
@@ -675,6 +686,39 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Finds the remainder when an integer power of a specified number is
+     * divided by a particular modulus. Both the base and the modulus are
+     * binary values represented as bit arrays.
+     * @param bits the base value.
+     * @param mod the modulus.
+     * @param exp the integer power.
+     * @return {@code (bits ^ exp) % mod}
+     */
+    private static boolean[] modPow(boolean[] bits, boolean[] mod, int exp) {
+        final boolean[] pow = new boolean[Integer.SIZE];
+        int index = 0;
+        while(exp != 0) {
+            pow[index++] = (exp & 1) == 1;
+            exp >>>= 1;
+        }
+        boolean[] nextBits = new boolean[bits.length];
+        if(index == 0) {
+            nextBits[0] = true;
+            return divideAndRemainder(nextBits, mod)[1];
+        }
+        index--;
+        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
+        while(index > 0) {
+            index--;
+            nextBits = divideAndRemainder(square(nextBits), mod)[1];
+            if(pow[index]) {
+                nextBits = divideAndRemainder(multiply(nextBits, bits), mod)[1];
+            }
+        }
+        return nextBits;
+    }
+
+    /**
      * Performs a bit-shift on a bit array representing a binary value.
      * @param bits the bit array.
      * @param shift the shift amount. If {@code shift > 0}, then the bits will be moved
@@ -696,8 +740,8 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     /**
      * Computes the integral square root of a binary number represented as a bit array.
      * @param bits the target number.
-     * @return a bit array of the unique {@code UnsignedInt i} such that {@code i^2 <= this}
-     * and {@code (i+1)^2 > this}.
+     * @return a bit array of the unique {@code UnsignedInt i} such that {@code i^2 <= bits}
+     * and {@code (i+1)^2 > bits}.
      */
     private static boolean[] sqrt(boolean... bits) {
         boolean[] nextBits = new boolean[bits.length];
