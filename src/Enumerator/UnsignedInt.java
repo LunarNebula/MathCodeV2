@@ -56,7 +56,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     public UnsignedInt(int bits, int value) {
         verifyBitLegality(bits);
         this.bits = toBinaryArray(bits, value);
-        this.hashCode = computeHashcode();
+        this.hashCode = value;
         this.factors = new ArrayList<>();
     }
 
@@ -120,10 +120,11 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Subtracts a specified UnsignedInt from this UnsignedInt
-     * @param subtrahend the subtrahend UnsignedInt
-     * @return this - subtrahend
-     * @throws IllegalArgumentException if the bit capacities of this UnsignedInt and the subtrahend UnsignedInt are unequal
+     * Subtracts a specified {@code UnsignedInt} from this {@code UnsignedInt}.
+     * @param subtrahend the subtrahend {@code UnsignedInt}.
+     * @return {@code this - subtrahend}
+     * @throws IllegalArgumentException if the bit capacities of this {@code UnsignedInt}
+     * and the subtrahend {@code UnsignedInt} are unequal.
      */
     public UnsignedInt subtract(@NotNull UnsignedInt subtrahend) throws IllegalArgumentException {
         verifyBitEquality(this.bits.length, subtrahend.bits.length);
@@ -246,7 +247,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     /**
      * Computes the {@code UnsignedInt} formed from taking a bitwise {@code AND}
      * function across this {@code UnsignedInt} and a comparator {@code UnsignedInt}.
-     * @param o the comparator {@code BooleanSetOperable}.
+     * @param o the comparator {@code UnsignedInt}.
      * @return {@code this AND o}
      * @throws IllegalArgumentException if the bit capacities of this and the comparator
      * are unequal.
@@ -264,7 +265,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     /**
      * Computes the {@code UnsignedInt} formed from taking a bitwise {@code OR}
      * function across this {@code UnsignedInt} and a comparator {@code UnsignedInt}.
-     * @param o the comparator {@code BooleanSetOperable}.
+     * @param o the comparator {@code UnsignedInt}.
      * @return {@code this OR o}
      * @throws IllegalArgumentException if the bit capacities of this and the comparator
      * are unequal.
@@ -282,7 +283,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     /**
      * Computes the {@code UnsignedInt} formed from taking a bitwise {@code XOR}
      * function across this {@code UnsignedInt} and a comparator {@code UnsignedInt}.
-     * @param o the comparator {@code BooleanSetOperable}.
+     * @param o the comparator {@code UnsignedInt}.
      * @return {@code this XOR o}
      * @throws IllegalArgumentException if the bit capacities of this and the comparator
      * are unequal.
@@ -300,7 +301,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     /**
      * Computes the {@code UnsignedInt} formed from taking a bitwise {@code AND NOT}
      * function across this {@code UnsignedInt} and a comparator {@code UnsignedInt}.
-     * @param o the comparator {@code BooleanSetOperable}.
+     * @param o the comparator {@code UnsignedInt}.
      * @return {@code this AND NOT o}
      * @throws IllegalArgumentException if the bit capacities of this and the comparator
      * are unequal.
