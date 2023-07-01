@@ -3,12 +3,9 @@ package Enumerator;
 import Algebra.BooleanOperable;
 import DataSet.BST;
 import Exception.*;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -55,23 +52,9 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * @param value the initial value.
      */
     public UnsignedInt(int bits, int value) {
+        verifyBitLegality(bits);
         this.bits = toBinaryArray(bits, value);
         this.hashCode = computeHashcode();
-    }
-
-    /**
-     * Creates a new binary array with a specified bit capacity and initial binary value.
-     * @param bits the capacity.
-     * @param value the initial value.
-     * @return the converted bit array.
-     */
-    private static boolean[] toBinaryArray(int bits, int value) {
-        final boolean[] nextBits = new boolean[bits];
-        for(int i = 0; i < bits && value != 0; i++) {
-            nextBits[i] = ((1 & value) != 0);
-            value >>>= 1;
-        }
-        return nextBits;
     }
 
     /**
@@ -121,24 +104,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Increments a number represented by a bit array by 1.
-     * @param bits the bit array.
-     * @return {@code bits + 1}
-     */
-    private static boolean[] increment(boolean... bits) {
-        final boolean[] nextBits = new boolean[bits.length];
-        int index = 0;
-        boolean carry = true;
-        while(carry & (index < nextBits.length)) {
-            nextBits[index] = ! bits[index];
-            carry = bits[index];
-            index++;
-        }
-        System.arraycopy(bits, index, nextBits, index, nextBits.length - index);
-        return nextBits;
-    }
-
-    /**
      * Adds this {@code UnsignedInt} to another {@code UnsignedInt}.
      * @param addend the addend {@code UnsignedInt}.
      * @return {@code this + addend}
@@ -148,22 +113,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     public UnsignedInt add(@NotNull UnsignedInt addend) throws IllegalArgumentException {
         verifyBitEquality(this.bits.length, addend.bits.length);
         return new UnsignedInt(add(this.bits, addend.bits));
-    }
-
-    /**
-     * Finds the sum of two values represented as bit (boolean) arrays.
-     * @param a the first addend.
-     * @param b the second addend.
-     * @return {@code a + b}
-     */
-    private static boolean[] add(boolean[] a, boolean[] b) {
-        final boolean[] nextBits = new boolean[a.length];
-        boolean carry = false;
-        for(int i = 0; i < nextBits.length; i++) {
-            nextBits[i] = carry ^ a[i] ^ b[i];
-            carry = ((carry | a[i]) & b[i]) | (carry & a[i]);
-        }
-        return nextBits;
     }
 
     /**
@@ -178,46 +127,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Computes the difference between two numbers represented as bit (boolean) arrays.
-     * @param a the minuend.
-     * @param b the subtrahend.
-     * @return {@code a - b}
-     */
-    private static boolean[] subtract(boolean[] a, boolean[] b) {
-        return add(a, negate(b));
-    }
-
-    /**
-     * Finds the negation of a number represented as a bit array.
-     * @param bits the number.
-     * @return {@code -bits}
-     */
-    private static boolean[] negate(boolean... bits) {
-        final boolean[] nextBits = new boolean[bits.length];
-        boolean carry = true;
-        for(int i = 0; i < nextBits.length; i++) {
-            nextBits[i] = (carry == bits[i]);
-            if(carry) {
-                carry = ! bits[i];
-            }
-        }
-        return nextBits;
-    }
-
-    /**
-     * Computes the bitwise negation of a number represented as a bit array.
-     * @param bits the number.
-     * @return {@code ~bits}
-     */
-    private static boolean[] NOT(boolean... bits) {
-        final boolean[] nextBits = new boolean[bits.length];
-        for(int i = 0; i < nextBits.length; i++) {
-            nextBits[i] = ! bits[i];
-        }
-        return nextBits;
-    }
-
-    /**
      * Finds the product of this {@code UnsignedInt} and another, specified {@code UnsignedInt}.
      * @param multiplicand the multiplicand {@code UnsignedInt}.
      * @return {@code this * multiplicand}
@@ -229,59 +138,11 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Computes the product of two numbers represented as arrays of binary digits.
-     * @param a the first multiplicand.
-     * @param b the second multiplicand.
-     * @return {@code a * b}
-     */
-    private static boolean[] multiply(boolean[] a, boolean[] b) {
-        final boolean[] nextBits = new boolean[a.length];
-        for(int i = 0; i < nextBits.length; i++) {
-            boolean carry = false;
-            final int limit = nextBits.length - i;
-            if(a[i]) {
-                for(int j = 0; j < limit; j++) {
-                    final int index = i + j;
-                    final boolean digit = nextBits[index] ^ b[j] ^ carry;
-                    carry = (((carry | nextBits[index]) & b[j]) | (carry & nextBits[index]));
-                    nextBits[i + j] = digit;
-                }
-            }
-        }
-        return nextBits;
-    }
-
-    /**
      * Computes the square of this {@code UnsignedInt}.
-     * @return {@code this * this}, or {@code this^2}
+     * @return {@code this * this}, or {@code this ^ 2}.
      */
     public UnsignedInt square() {
         return new UnsignedInt(square(this.bits));
-    }
-
-    /**
-     * Computes the square of a value represented as an array of binary (boolean) digits.
-     * @return the (truncated) square of the number.
-     */
-    private static boolean[] square(boolean... bits) {
-        final boolean[] nextBits = new boolean[bits.length];
-        final int lastIndex = nextBits.length - 1, digitMatchLimit = lastIndex >> 1;
-        for(int i = 0; i <= digitMatchLimit; i++) {
-            nextBits[i << 1] = bits[i];
-        }
-        for(int i = 0; i < nextBits.length; i++) {
-            boolean carry = false;
-            final int limit = lastIndex - i;
-            if(bits[i]) {
-                for(int j = i + 1; j < limit; j++) {
-                    final int index = i + j + 1;
-                    final boolean digit = nextBits[index] ^ bits[j] ^ carry;
-                    carry = (((carry | nextBits[index]) & bits[j]) | (carry & nextBits[index]));
-                    nextBits[index] = digit;
-                }
-            }
-        }
-        return nextBits;
     }
 
     /**
@@ -290,27 +151,7 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
      * @return {@code this ^ exp}
      */
     public UnsignedInt pow(int exp) {
-        final boolean[] pow = new boolean[Integer.SIZE];
-        int index = 0;
-        while(exp != 0) {
-            pow[index++] = (exp & 1) == 1;
-            exp >>>= 1;
-        }
-        boolean[] nextBits = new boolean[this.bits.length];
-        if(index == 0) {
-            nextBits[0] = true;
-            return new UnsignedInt(nextBits);
-        }
-        index--;
-        System.arraycopy(this.bits, 0, nextBits, 0, nextBits.length);
-        while(index > 0) {
-            index--;
-            nextBits = square(nextBits);
-            if(pow[index]) {
-                nextBits = multiply(this.bits, nextBits);
-            }
-        }
-        return new UnsignedInt(nextBits);
+        return new UnsignedInt(pow(this.bits, exp));
     }
 
     /**
@@ -324,53 +165,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         verifyBitEquality(this.bits.length, divisor.bits.length);
         final boolean[][] bits = divideAndRemainder(this.bits, divisor.bits);
         return new UnsignedInt[]{new UnsignedInt(bits[0]), new UnsignedInt(bits[1])};
-    }
-
-    /**
-     * Computes the quotient and remainder of two numbers represented as bit arrays.
-     * @param dividend the dividend value.
-     * @param divisor the divisor value.
-     * @return an array containing two bit arrays, that at index {@code 0} designating
-     * a binary value equal to {@code dividend / divisor} and that at index {@code 1}
-     * designating {@code dividend % divisor}.
-     */
-    private static boolean[] [] divideAndRemainder(boolean[] dividend, boolean[] divisor) {
-        final int length = divisor.length, lastIndex = length - 1;
-        final boolean[] quotientBits = new boolean[length];
-        final boolean[] remainderBits = new boolean[length];
-        System.arraycopy(dividend, 0, remainderBits, 0, length);
-        int dividendIndex = lastIndex, divisorIndex = lastIndex;
-        while(divisorIndex >= 0 && ! divisor[divisorIndex]) {
-            divisorIndex--;
-        }
-        if(divisorIndex < 0) {
-            throw new ArithmeticException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
-        }
-        while(dividendIndex >= 0 && ! remainderBits[dividendIndex]) {
-            dividendIndex--;
-        }
-        while(dividendIndex >= divisorIndex) {
-            final int startIndex = dividendIndex - divisorIndex;
-            int digitCopyIndex = startIndex;
-            final boolean[] newRemainder = new boolean[divisorIndex + 1];
-            boolean carry = false;
-            for(int i = 0; i < newRemainder.length; i++) {
-                newRemainder[i] = remainderBits[digitCopyIndex] ^ divisor[i] ^ carry;
-                carry = ((carry || divisor[i]) && !remainderBits[digitCopyIndex]) ||
-                        (carry & remainderBits[digitCopyIndex] & divisor[i]);
-                digitCopyIndex++;
-            }
-            if((! carry) || (dividendIndex < lastIndex && remainderBits[dividendIndex + 1])) {
-                if(carry) {
-                    remainderBits[dividendIndex + 1] = false;
-                }
-                System.arraycopy(newRemainder, 0, remainderBits,
-                        startIndex, newRemainder.length);
-                quotientBits[startIndex] = true;
-            }
-            dividendIndex--;
-        }
-        return new boolean[][]{quotientBits, remainderBits};
     }
 
     /**
@@ -410,90 +204,12 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Performs a bit-shift on a bit array representing a binary value.
-     * @param bits the bit array.
-     * @param shift the shift amount. If {@code shift > 0}, then the bits will be moved
-     *              {@code shift} steps to the left (for a value greater than or equal
-     *              to the previous). If {@code shift < 0}, then the bits will be moved
-     *              {@code (-shift)} steps to the right.
-     * @return the shifted binary array.
-     */
-    private static boolean[] shift(boolean[] bits, int shift) {
-        final boolean[] nextBits = new boolean[bits.length];
-        if(shift > 0) {
-            System.arraycopy(bits, 0, nextBits, shift, nextBits.length - shift);
-        } else {
-            System.arraycopy(bits, -shift, nextBits, 0, nextBits.length + shift);
-        }
-        return nextBits;
-    }
-
-    /**
      * Computes the integral square root of this {@code UnsignedInt}.
      * @return the unique {@code UnsignedInt i} such that {@code i^2 <= this} and
      * {@code (i+1)^2 > this}.
      */
     public UnsignedInt sqrt() {
         return new UnsignedInt(sqrt(this.bits));
-    }
-
-    /**
-     * Computes the integral square root of a binary number represented as a bit array.
-     * @param bits the target number.
-     * @return a bit array of the unique {@code UnsignedInt i} such that {@code i^2 <= this}
-     * and {@code (i+1)^2 > this}.
-     */
-    private static boolean[] sqrt(boolean... bits) {
-        boolean[] nextBits = new boolean[bits.length];
-        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
-        boolean[] prevBits = nextBits, prevPrevBits;
-        do {
-            prevPrevBits = prevBits;
-            prevBits = nextBits;
-            nextBits = shift(add(nextBits, divideAndRemainder(bits, nextBits)[0]), -1);
-        } while(! equals(prevPrevBits, nextBits));
-        return prevBits;
-    }
-
-    /**
-     * Computes a list of prime factors for a number represented as a bit array.
-     * @param bits the target number.
-     * @return the list of all numbers {@code n} satisfying {@code (n | bits)}.
-     */
-    private static List<boolean[]> primeFactors(boolean... bits) {
-        final List<boolean[]> primeFactors = new ArrayList<>();
-        int nonZeroIndex = 0;
-        while(nonZeroIndex < bits.length && ! bits[nonZeroIndex]) {
-            nonZeroIndex++;
-        }
-        if(nonZeroIndex != bits.length) {
-            for(int i = 0; i < nonZeroIndex; i++) {
-                primeFactors.add(toBinaryArray(bits.length, 2));
-            }
-            bits = shift(bits, -nonZeroIndex);
-            boolean[] sqrt = sqrt(bits), divisor = toBinaryArray(bits.length, 3);
-            final boolean[] TWO = toBinaryArray(bits.length, 2);
-            while (compareTo(divisor, sqrt) <= 0) {
-                boolean recompute = false;
-                boolean[][] quotientRemainder = divideAndRemainder(bits, divisor);
-                while(isZero(quotientRemainder[1])) {
-                    final boolean[] digits = new boolean[bits.length];
-                    System.arraycopy(divisor, 0, digits, 0, bits.length);
-                    primeFactors.add(digits);
-                    bits = quotientRemainder[0];
-                    quotientRemainder = divideAndRemainder(bits, divisor);
-                    recompute = true;
-                }
-                if(recompute) {
-                    sqrt = sqrt(bits);
-                }
-                divisor = add(divisor, TWO);
-            }
-            if(compareTo(bits, toBinaryArray(bits.length, 1)) > 0) {
-                primeFactors.add(bits);
-            }
-        }
-        return primeFactors;
     }
 
     /**
@@ -510,35 +226,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
             this.factors = new BST<>(proxyList).getOrderedList();
         }
         return new ArrayList<>(this.factors);
-    }
-
-    /**
-     * Computes all factors of a number represented as a bit array.
-     * @param bits the target number.
-     * @return a list of bit arrays representing all numbers that evenly divide
-     * the target value.
-     */
-    private static List<boolean[]> factors(boolean... bits) {
-        final List<boolean[]> primes = primeFactors(bits), factors = new ArrayList<>();
-        List<boolean[]> test = new ArrayList<>();
-        boolean[] prev = toBinaryArray(bits.length, 1);
-        boolean[] product = toBinaryArray(bits.length, 1);
-        factors.add(toBinaryArray(bits.length, 1));
-        for(boolean[] primeFactor : primes) {
-            if(equals(primeFactor, prev)) {
-                product = multiply(product, primeFactor);
-            } else {
-                factors.addAll(test);
-                prev = primeFactor;
-                test = new ArrayList<>();
-                product = primeFactor;
-            }
-            for(boolean[] factor : factors) {
-                test.add(multiply(factor, product));
-            }
-        }
-        factors.addAll(test);
-        return factors;
     }
 
     /**
@@ -687,20 +374,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Determines whether a specified bit array designates a zero value.
-     * @param bits the bit array.
-     * @return {@code true} if no bits in the array are flipped, else {@code false}.
-     */
-    private static boolean isZero(boolean[] bits) {
-        for(boolean b : bits) {
-            if(b) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Compares this {@code UnsignedInt} to another, specified {@code UnsignedInt}.
      * @param o the comparator {@code UnsignedInt}.
      * @return {@code 0} if the two values are identical, else {@code 1} if
@@ -712,22 +385,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     public int compareTo(@NotNull UnsignedInt o) throws IllegalArgumentException {
         verifyBitEquality(this.bits.length, o.bits.length);
         return compareTo(this.bits, o.bits);
-    }
-
-    /**
-     * Finds a comparison between two numbers represented by bit arrays.
-     * @param a the first number.
-     * @param b the second number.
-     * @return {@code 1} if {@code a > b}, else {@code 0} if {@code a = b},
-     * else {@code -1} when {@code a < b}.
-     */
-    private static int compareTo(boolean[] a, boolean[] b) {
-        for(int i = a.length - 1; i >= 0; i--) {
-            if(a[i] ^ b[i]) {
-                return a[i] ? 1 : -1;
-            }
-        }
-        return 0;
     }
 
     /**
@@ -758,22 +415,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
-     * Determines whether two numbers represented as bit arrays are equal.
-     * @param a the first number.
-     * @param b the second number.
-     * @return {@code true} if each bit of {@code a} is equal to the corresponding
-     * bit of {@code b}, else {@code false} if at least one bit is different.
-     */
-    private static boolean equals(boolean[] a, boolean[] b) {
-        for(int i = 0; i < a.length; i++) {
-            if(a[i] ^ b[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Converts this {@code UnsignedInt} to a printable format.
      * @return this {@code UnsignedInt} as a {@code String}.
      */
@@ -794,25 +435,6 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     // Static methods
-
-    /**
-     * Creates a new {@code UnsignedInt} with the bit count and binary value
-     * of a specified int.
-     * @param bits the number of bits to be allocated.
-     * @param value the target int value.
-     * @return the computed {@code UnsignedInt}.
-     */
-    @Contract("_, _ -> new")
-    public static @NotNull UnsignedInt valueOf(int bits, int value) {
-        verifyBitLegality(bits);
-        final boolean[] nextBits = new boolean[bits];
-        int index = 0;
-        while(index < bits && value != 0) {
-            nextBits[index++] = (value & 1) == 1;
-            value >>>= 1;
-        }
-        return new UnsignedInt(nextBits);
-    }
 
     /**
      * Determines whether the bit counts of two {@code UnsignedInts} allow for
@@ -836,5 +458,372 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
         if(bitLength < 0) {
             throw new IllegalArgumentException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
         }
+    }
+
+    /**
+     * Creates a new binary array with a specified bit capacity and initial binary value.
+     * @param bits the capacity.
+     * @param value the initial value.
+     * @return the converted bit array.
+     */
+    private static boolean[] toBinaryArray(int bits, int value) {
+        final boolean[] nextBits = new boolean[bits];
+        for(int i = 0; i < bits && value != 0; i++) {
+            nextBits[i] = ((1 & value) != 0);
+            value >>>= 1;
+        }
+        return nextBits;
+    }
+
+    /**
+     * Increments a number represented by a bit array by 1.
+     * @param bits the bit array.
+     * @return {@code bits + 1}
+     */
+    private static boolean[] increment(boolean... bits) {
+        final boolean[] nextBits = new boolean[bits.length];
+        int index = 0;
+        boolean carry = true;
+        while(carry & (index < nextBits.length)) {
+            nextBits[index] = ! bits[index];
+            carry = bits[index];
+            index++;
+        }
+        System.arraycopy(bits, index, nextBits, index, nextBits.length - index);
+        return nextBits;
+    }
+
+    /**
+     * Finds the sum of two values represented as bit (boolean) arrays.
+     * @param a the first addend.
+     * @param b the second addend.
+     * @return {@code a + b}
+     */
+    private static boolean[] add(boolean[] a, boolean[] b) {
+        final boolean[] nextBits = new boolean[a.length];
+        boolean carry = false;
+        for(int i = 0; i < nextBits.length; i++) {
+            nextBits[i] = carry ^ a[i] ^ b[i];
+            carry = ((carry | a[i]) & b[i]) | (carry & a[i]);
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the difference between two numbers represented as bit (boolean) arrays.
+     * @param a the minuend.
+     * @param b the subtrahend.
+     * @return {@code a - b}
+     */
+    private static boolean[] subtract(boolean[] a, boolean[] b) {
+        return add(a, negate(b));
+    }
+
+    /**
+     * Finds the negation of a number represented as a bit array.
+     * @param bits the number.
+     * @return {@code -bits}
+     */
+    private static boolean[] negate(boolean... bits) {
+        final boolean[] nextBits = new boolean[bits.length];
+        boolean carry = true;
+        for(int i = 0; i < nextBits.length; i++) {
+            nextBits[i] = (carry == bits[i]);
+            if(carry) {
+                carry = ! bits[i];
+            }
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the bitwise negation of a number represented as a bit array.
+     * @param bits the number.
+     * @return {@code ~bits}
+     */
+    private static boolean[] NOT(boolean... bits) {
+        final boolean[] nextBits = new boolean[bits.length];
+        for(int i = 0; i < nextBits.length; i++) {
+            nextBits[i] = ! bits[i];
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the product of two numbers represented as arrays of binary digits.
+     * @param a the first multiplicand.
+     * @param b the second multiplicand.
+     * @return {@code a * b}
+     */
+    private static boolean[] multiply(boolean[] a, boolean[] b) {
+        final boolean[] nextBits = new boolean[a.length];
+        for(int i = 0; i < nextBits.length; i++) {
+            boolean carry = false;
+            final int limit = nextBits.length - i;
+            if(a[i]) {
+                for(int j = 0; j < limit; j++) {
+                    final int index = i + j;
+                    final boolean digit = nextBits[index] ^ b[j] ^ carry;
+                    carry = (((carry | nextBits[index]) & b[j]) | (carry & nextBits[index]));
+                    nextBits[i + j] = digit;
+                }
+            }
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the square of a value represented as an array of binary (boolean) digits.
+     * @return the (truncated) square of the number.
+     */
+    private static boolean[] square(boolean... bits) {
+        final boolean[] nextBits = new boolean[bits.length];
+        final int lastIndex = nextBits.length - 1, digitMatchLimit = lastIndex >> 1;
+        for(int i = 0; i <= digitMatchLimit; i++) {
+            nextBits[i << 1] = bits[i];
+        }
+        for(int i = 0; i < nextBits.length; i++) {
+            boolean carry = false;
+            final int limit = lastIndex - i;
+            if(bits[i]) {
+                for(int j = i + 1; j < limit; j++) {
+                    final int index = i + j + 1;
+                    final boolean digit = nextBits[index] ^ bits[j] ^ carry;
+                    carry = (((carry | nextBits[index]) & bits[j]) | (carry & nextBits[index]));
+                    nextBits[index] = digit;
+                }
+            }
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes an integer power of a binary number represented by a bit array.
+     * @param bits the target number.
+     * @param exp the integer power.
+     * @return {@code (bits ^ exp)} as a bit array.
+     */
+    private static boolean[] pow(boolean[] bits, int exp) {
+        final boolean[] pow = new boolean[Integer.SIZE];
+        int index = 0;
+        while(exp != 0) {
+            pow[index++] = (exp & 1) == 1;
+            exp >>>= 1;
+        }
+        boolean[] nextBits = new boolean[bits.length];
+        if(index == 0) {
+            nextBits[0] = true;
+            return nextBits;
+        }
+        index--;
+        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
+        while(index > 0) {
+            index--;
+            nextBits = square(nextBits);
+            if(pow[index]) {
+                nextBits = multiply(bits, nextBits);
+            }
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the quotient and remainder of two numbers represented as bit arrays.
+     * @param dividend the dividend value.
+     * @param divisor the divisor value.
+     * @return an array containing two bit arrays, that at index {@code 0} designating
+     * a binary value equal to {@code dividend / divisor} and that at index {@code 1}
+     * designating {@code dividend % divisor}.
+     */
+    private static boolean[] [] divideAndRemainder(boolean[] dividend, boolean[] divisor) {
+        final int length = divisor.length, lastIndex = length - 1;
+        final boolean[] quotientBits = new boolean[length];
+        final boolean[] remainderBits = new boolean[length];
+        System.arraycopy(dividend, 0, remainderBits, 0, length);
+        int dividendIndex = lastIndex, divisorIndex = lastIndex;
+        while(divisorIndex >= 0 && ! divisor[divisorIndex]) {
+            divisorIndex--;
+        }
+        if(divisorIndex < 0) {
+            throw new ArithmeticException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
+        }
+        while(dividendIndex >= 0 && ! remainderBits[dividendIndex]) {
+            dividendIndex--;
+        }
+        while(dividendIndex >= divisorIndex) {
+            final int startIndex = dividendIndex - divisorIndex;
+            int digitCopyIndex = startIndex;
+            final boolean[] newRemainder = new boolean[divisorIndex + 1];
+            boolean carry = false;
+            for(int i = 0; i < newRemainder.length; i++) {
+                newRemainder[i] = remainderBits[digitCopyIndex] ^ divisor[i] ^ carry;
+                carry = ((carry || divisor[i]) && !remainderBits[digitCopyIndex]) ||
+                        (carry & remainderBits[digitCopyIndex] & divisor[i]);
+                digitCopyIndex++;
+            }
+            if((! carry) || (dividendIndex < lastIndex && remainderBits[dividendIndex + 1])) {
+                if(carry) {
+                    remainderBits[dividendIndex + 1] = false;
+                }
+                System.arraycopy(newRemainder, 0, remainderBits,
+                        startIndex, newRemainder.length);
+                quotientBits[startIndex] = true;
+            }
+            dividendIndex--;
+        }
+        return new boolean[][]{quotientBits, remainderBits};
+    }
+
+    /**
+     * Performs a bit-shift on a bit array representing a binary value.
+     * @param bits the bit array.
+     * @param shift the shift amount. If {@code shift > 0}, then the bits will be moved
+     *              {@code shift} steps to the left (for a value greater than or equal
+     *              to the previous). If {@code shift < 0}, then the bits will be moved
+     *              {@code (-shift)} steps to the right.
+     * @return the shifted binary array.
+     */
+    private static boolean[] shift(boolean[] bits, int shift) {
+        final boolean[] nextBits = new boolean[bits.length];
+        if(shift > 0) {
+            System.arraycopy(bits, 0, nextBits, shift, nextBits.length - shift);
+        } else {
+            System.arraycopy(bits, -shift, nextBits, 0, nextBits.length + shift);
+        }
+        return nextBits;
+    }
+
+    /**
+     * Computes the integral square root of a binary number represented as a bit array.
+     * @param bits the target number.
+     * @return a bit array of the unique {@code UnsignedInt i} such that {@code i^2 <= this}
+     * and {@code (i+1)^2 > this}.
+     */
+    private static boolean[] sqrt(boolean... bits) {
+        boolean[] nextBits = new boolean[bits.length];
+        System.arraycopy(bits, 0, nextBits, 0, nextBits.length);
+        boolean[] prevBits = nextBits, prevPrevBits;
+        do {
+            prevPrevBits = prevBits;
+            prevBits = nextBits;
+            nextBits = shift(add(nextBits, divideAndRemainder(bits, nextBits)[0]), -1);
+        } while(! equals(prevPrevBits, nextBits));
+        return prevBits;
+    }
+
+    /**
+     * Computes a list of prime factors for a number represented as a bit array.
+     * @param bits the target number.
+     * @return the list of all numbers {@code n} satisfying {@code (n | bits)}.
+     */
+    private static List<boolean[]> primeFactors(boolean... bits) {
+        final List<boolean[]> primeFactors = new ArrayList<>();
+        int nonZeroIndex = 0;
+        while(nonZeroIndex < bits.length && ! bits[nonZeroIndex]) {
+            nonZeroIndex++;
+        }
+        if(nonZeroIndex != bits.length) {
+            for(int i = 0; i < nonZeroIndex; i++) {
+                primeFactors.add(toBinaryArray(bits.length, 2));
+            }
+            bits = shift(bits, -nonZeroIndex);
+            boolean[] sqrt = sqrt(bits), divisor = toBinaryArray(bits.length, 3);
+            final boolean[] TWO = toBinaryArray(bits.length, 2);
+            while (compareTo(divisor, sqrt) <= 0) {
+                boolean recompute = false;
+                boolean[][] quotientRemainder = divideAndRemainder(bits, divisor);
+                while(isZero(quotientRemainder[1])) {
+                    final boolean[] digits = new boolean[bits.length];
+                    System.arraycopy(divisor, 0, digits, 0, bits.length);
+                    primeFactors.add(digits);
+                    bits = quotientRemainder[0];
+                    quotientRemainder = divideAndRemainder(bits, divisor);
+                    recompute = true;
+                }
+                if(recompute) {
+                    sqrt = sqrt(bits);
+                }
+                divisor = add(divisor, TWO);
+            }
+            if(compareTo(bits, toBinaryArray(bits.length, 1)) > 0) {
+                primeFactors.add(bits);
+            }
+        }
+        return primeFactors;
+    }
+
+    /**
+     * Computes all factors of a number represented as a bit array.
+     * @param bits the target number.
+     * @return a list of bit arrays representing all numbers that evenly divide
+     * the target value.
+     */
+    private static List<boolean[]> factors(boolean... bits) {
+        final List<boolean[]> primes = primeFactors(bits), factors = new ArrayList<>();
+        List<boolean[]> test = new ArrayList<>();
+        boolean[] prev = toBinaryArray(bits.length, 1);
+        boolean[] product = toBinaryArray(bits.length, 1);
+        factors.add(toBinaryArray(bits.length, 1));
+        for(boolean[] primeFactor : primes) {
+            if(equals(primeFactor, prev)) {
+                product = multiply(product, primeFactor);
+            } else {
+                factors.addAll(test);
+                prev = primeFactor;
+                test = new ArrayList<>();
+                product = primeFactor;
+            }
+            for(boolean[] factor : factors) {
+                test.add(multiply(factor, product));
+            }
+        }
+        factors.addAll(test);
+        return factors;
+    }
+
+    /**
+     * Determines whether a specified bit array designates a zero value.
+     * @param bits the bit array.
+     * @return {@code true} if no bits in the array are flipped, else {@code false}.
+     */
+    private static boolean isZero(boolean[] bits) {
+        for(boolean b : bits) {
+            if(b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Finds a comparison between two numbers represented by bit arrays.
+     * @param a the first number.
+     * @param b the second number.
+     * @return {@code 1} if {@code a > b}, else {@code 0} if {@code a = b},
+     * else {@code -1} when {@code a < b}.
+     */
+    private static int compareTo(boolean[] a, boolean[] b) {
+        for(int i = a.length - 1; i >= 0; i--) {
+            if(a[i] ^ b[i]) {
+                return a[i] ? 1 : -1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Determines whether two numbers represented as bit arrays are equal.
+     * @param a the first number.
+     * @param b the second number.
+     * @return {@code true} if each bit of {@code a} is equal to the corresponding
+     * bit of {@code b}, else {@code false} if at least one bit is different.
+     */
+    private static boolean equals(boolean[] a, boolean[] b) {
+        for(int i = 0; i < a.length; i++) {
+            if(a[i] ^ b[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }
