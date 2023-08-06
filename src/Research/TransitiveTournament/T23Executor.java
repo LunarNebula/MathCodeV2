@@ -1,4 +1,4 @@
-package Research;
+package Research.TransitiveTournament;
 
 import java.util.HashSet;
 import java.util.LinkedList;

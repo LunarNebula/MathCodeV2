@@ -1,4 +1,4 @@
-package Research;
+package Research.TransitiveTournament;
 
 import Exception.*;
 import Exception.ExceptionMessage.TargetedMessage;

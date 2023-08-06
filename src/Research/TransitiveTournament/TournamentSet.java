@@ -1,4 +1,4 @@
-package Research;
+package Research.TransitiveTournament;
 
 import java.util.LinkedList;
 import java.util.List;
