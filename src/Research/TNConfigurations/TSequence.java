@@ -1,10 +1,86 @@
 package Research.TNConfigurations;
 
+import Exception.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class TSequence {
     private static final String[] T_SEQUENCE = {"-", "+"};
+    private int sequence;
+    private final int length;
 
     /**
-     * Computes the number of cases covered by one or more of the following formulae:
+     * Creates a new {@code TSequence}.
+     * @param str the character string symbolizing the {@code TSequence}.
+     * @throws IllegalArgumentException if the string does not symbolize a valid T-sequence.
+     */
+    public TSequence(String str) throws IllegalArgumentException {
+        this.length = str.length();
+        int sequence = 0;
+        for(char c : str.toCharArray()) {
+            sequence <<= 1;
+            if(c == '+') {
+                sequence |= 1;
+            } else if(c != '-') {
+                throw new IllegalArgumentException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
+            }
+        }
+        this.sequence = sequence;
+    }
+
+    /**
+     * Creates a new {@code TSequence}.
+     * @param n the binary encoding of the T-sequence.
+     * @param length the length of the T-sequence.
+     */
+    public TSequence(int n, int length) {
+        this.sequence = n;
+        this.length = length;
+    }
+
+    /**
+     * Rotates the bit sequence in this {@code TSequence} to the right by one.
+     */
+    public void rotateBitsRight() {
+        this.sequence = rotateBitsRight(this.sequence, this.length);
+    }
+
+    /**
+     * Converts this {@code TSequence} to a printable format.
+     * @return this {@code TSequence} as a {@code String}.
+     */
+    @Override
+    public String toString() {
+        int num = this.sequence;
+        final StringBuilder builder = new StringBuilder();
+        int count = 0;
+        if(num == 0) {
+            builder.append(0);
+            count++;
+        }
+        while(num != 0 && count++ < length) {
+            builder.insert(0, T_SEQUENCE[num & 1]);
+            num >>>= 1;
+        }
+        if(count < length) {
+            int cropLength = length - count;
+            builder.insert(0, T_SEQUENCE[0].repeat(cropLength));
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Prints this {@code TSequence}.
+     */
+    public void print() {
+        System.out.println(this);
+    }
+
+    // Static methods
+
+    /**
+     * Finds the set of cases not covered by any of the following formulae:
      * <ul>
      *     <li>+^N</li>
      *     <li>-^N</li>
@@ -14,14 +90,9 @@ public class TSequence {
      *     <li>Any cyclic permutation of the above.</li>
      * </ul>
      * @param length the length of the T-sequence.
-     * @param print {@code true} if each uncovered T-sequence (independent up to
-     *                          cyclic permutation) should be printed to console.
-     * @param isTSequence {@code true} if the print statement should print a
-     *                                T-sequence, else {@code false} if it should
-     *                                print a binary value.
-     * @return the number of solved T-sequences.
+     * @return the list of unsolved T-sequences, independent of cyclic permutations.
      */
-    public static int numberOfCoveredCases(int length, boolean print, boolean isTSequence) {
+    public static List<Integer> uncoveredCases(int length) {
         final boolean[] tested = new boolean[1 << length];
         final boolean[] track = new boolean[tested.length];
         tested[0] = true;
@@ -37,6 +108,7 @@ public class TSequence {
             track[oneIndex] = true;
             initialIndex <<= 1;
         }
+        final List<Integer> uncoveredCases = new ArrayList<>();
         int coveredCases = 0;
         for(int i = 0; i < track.length; i++) {
             int revolveI = i;
@@ -63,15 +135,15 @@ public class TSequence {
                     }
                     revolveI = rotateBitsRight(revolveI, length);
                 }
-                if(print && ! isCovered) {
-                    printBinary(maxCase, length, isTSequence);
+                if(! isCovered) {
+                    uncoveredCases.add(maxCase);
                 }
             }
             if(track[i]) {
                 coveredCases++;
             }
         }
-        return coveredCases;
+        return uncoveredCases;
     }
 
     /**
@@ -85,35 +157,16 @@ public class TSequence {
     }
 
     /**
-     * Prints a specified integer as a binary value of a specified length.
-     * @param num the target integer.
-     * @param length the number of bits to be represented in the print statement. If
-     *               this value is less than the number of bits required to write the
-     *               number, part of the number will be cut off. If it is greater, the
-     *               extra bits will be set to zero.
-     * @param isTSequence {@code true} if the value should be printed as a T-sequence,
-     *                                else {@code false} if it should be printed as a
-     *                                raw binary value.
+     * Converts a list of integer values into a list of {@code TSequence} objects.
+     * @param ints the target ints.
+     * @param length the bit length for each {@code TSequence}.
+     * @return the list of {@code TSequence} values.
      */
-    public static void printBinary(int num, int length, boolean isTSequence) {
-        final StringBuilder builder = new StringBuilder();
-        int count = 0;
-        if(num == 0) {
-            builder.append(0);
-            count++;
+    public static List<TSequence> valuesOf(List<Integer> ints, int length) {
+        final List<TSequence> list = new ArrayList<>();
+        for(int i : ints) {
+            list.add(new TSequence(i, length));
         }
-        while(num != 0 && count++ < length) {
-            if(isTSequence) {
-                builder.insert(0, T_SEQUENCE[num & 1]);
-            } else {
-                builder.insert(0, num & 1);
-            }
-            num >>>= 1;
-        }
-        if(count < length) {
-            int cropLength = length - count;
-            builder.insert(0, (isTSequence ? T_SEQUENCE[0] : "0").repeat(cropLength));
-        }
-        System.out.println(builder);
+        return list;
     }
 }
