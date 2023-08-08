@@ -95,6 +95,7 @@ public class TSequence {
     public static List<Integer> uncoveredCases(int length) {
         final boolean[] tested = new boolean[1 << length];
         final boolean[] track = new boolean[tested.length];
+        final int NEG_POS_MASK = 1 << (length - 1);
         tested[0] = true;
         track[0] = true;
         tested[track.length - 1] = true;
@@ -115,7 +116,7 @@ public class TSequence {
             if(! tested[i]) {
                 boolean isCovered = false;
                 for(int j = 0; j < length && ! isCovered; j++) {
-                    int test = rotateBitsRight((revolveI << 1) | 1, length) >>> 1;
+                    int test = (revolveI | NEG_POS_MASK) >> 1;
                     while((test & 1) == 0) {
                         test >>>= 1;
                     }
