@@ -230,7 +230,7 @@ public class Combinatorics {
             product = product.multiply(factorial(value));
         }
         return factorial(sum).divide(product);
-    } // TODO: make more efficient
+    }
 
     /**
      * Finds the number of unique substrings of a given length contained in a larger String
@@ -276,7 +276,7 @@ public class Combinatorics {
     public static int numberOfBalancedCentrifuges(int n) {
         int count = 0, index = -1, middle = 1 - (n & 1);
         List<Integer> factors = Factor.distinctPrimeFactors(n);
-        if(factors.size() == 0) {
+        if(factors.isEmpty()) {
             return 1;
         } // case n == 1
         if(factors.get(0) == n) {
@@ -419,7 +419,7 @@ public class Combinatorics {
      */
     public static BigInteger numberOfCounterArrangements(List<Integer> given, List<Integer> target) {
         BigInteger sum = BigInteger.ZERO;
-        if(target.size() == 0) {
+        if(target.isEmpty()) {
             sum = BigInteger.ONE;
         } else if(target.get(0) <= given.size()) {
             int[] newGiven = new int[target.get(0)];
