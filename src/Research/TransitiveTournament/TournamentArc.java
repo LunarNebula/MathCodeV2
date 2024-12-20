@@ -1,4 +1,4 @@
-package Research;
+package Research.TransitiveTournament;
 
 public class TournamentArc {
     private final TournamentNode src, dest;

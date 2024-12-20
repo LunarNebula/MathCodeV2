@@ -87,4 +87,17 @@ public class Converter {
         }
         return points;
     }
+
+    /**
+     * Converts an array of {@code ints} to an array of {@code Integers}.
+     * @param n the array of {@code ints}.
+     * @return the converted array.
+     */
+    public static Integer[] convertToArrayOfIntegers(int... n) {
+        final Integer[] ar = new Integer[n.length];
+        for(int i = 0; i < ar.length; i++) {
+            ar[i] = n[i];
+        }
+        return ar;
+    }
 }

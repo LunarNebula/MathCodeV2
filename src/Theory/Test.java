@@ -2,10 +2,14 @@ package Theory;
 
 import General.Timer;
 
+/**
+ * Handles tests for most algorithms. Unless a change is being made to the general test
+ * structure, all changes to this class should be discarded before pushing.
+ */
 public class Test {
     /**
-     * Handles the main execution
-     * @param args command line arguments
+     * Handles the main execution.
+     * @param args command line arguments.
      */
     public static void main(String[] args) {
         final Timer timer = new Timer("Test_Timer");
@@ -20,7 +24,7 @@ public class Test {
 
     /**
      * Tests functions. Note that functions without Javadoc comments are not ready for testing.
-     * @throws Exception if an <code>Exception</code> occurs in the test
+     * @throws Exception if an {@code Exception} occurs in the test.
      */
     public static void test() throws Exception {
     }

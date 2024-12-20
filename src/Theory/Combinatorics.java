@@ -230,7 +230,7 @@ public class Combinatorics {
             product = product.multiply(factorial(value));
         }
         return factorial(sum).divide(product);
-    } // TODO: make more efficient
+    }
 
     /**
      * Finds the number of unique substrings of a given length contained in a larger String
@@ -276,7 +276,7 @@ public class Combinatorics {
     public static int numberOfBalancedCentrifuges(int n) {
         int count = 0, index = -1, middle = 1 - (n & 1);
         List<Integer> factors = Factor.distinctPrimeFactors(n);
-        if(factors.size() == 0) {
+        if(factors.isEmpty()) {
             return 1;
         } // case n == 1
         if(factors.get(0) == n) {
@@ -419,7 +419,7 @@ public class Combinatorics {
      */
     public static BigInteger numberOfCounterArrangements(List<Integer> given, List<Integer> target) {
         BigInteger sum = BigInteger.ZERO;
-        if(target.size() == 0) {
+        if(target.isEmpty()) {
             sum = BigInteger.ONE;
         } else if(target.get(0) <= given.size()) {
             int[] newGiven = new int[target.get(0)];
@@ -500,18 +500,20 @@ public class Combinatorics {
                 throw new IllegalArgumentException(ExceptionMessage.ARGUMENT_EXCEEDS_REQUIRED_DOMAIN());
             }
         }
-        int[][] table = new int[maxWeight + 1][];
+        int[][] table = new int[c.length + 1][];
         for(int i = 0; i < table.length; i++) {
-            table[i] = new int[c.length + 1];
+            table[i] = new int[maxWeight + 1];
         }
-        for(int i = 0; i < maxWeight; i++) {
-            for(int j = 0; j < c.length; j++) {
-                int nextWeight = i + c[j].getKeys()[0];
-                if(nextWeight < table.length) {
-                    table[nextWeight][j + 1] = Math.max(table[nextWeight][j + 1], table[i][j] + c[j].getKeys()[1]);
+        for(int i = 1; i <= c.length; i++) {
+            for (int j = 1; j <= maxWeight; j++) {
+                final Integer[] keys = c[i - 1].getKeys();
+                if (keys[0] > j) {
+                    table[i][j] = table[i - 1][j];
+                } else {
+                    table[i][j] = Math.max(table[i - 1][j], table[i - 1][j - keys[0]] + keys[1]);
                 }
             }
         }
-        return table[maxWeight][c.length];
+        return table[c.length][maxWeight];
     }
 }
