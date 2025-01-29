@@ -370,6 +370,21 @@ public class UnsignedInt implements BooleanOperable<UnsignedInt>, Comparable<Uns
     }
 
     /**
+     * Gets the bit array from this {@code UnsignedInt}.
+     * @param deepCopy {@code true} if the bit array returned should not point to
+     *                             the original bitset in memory, else {@code false}.
+     * @return {@code this.bits}
+     */
+    public boolean[] getBits(boolean deepCopy) {
+        if(deepCopy) {
+            final boolean[] bits = new boolean[this.bits.length];
+            System.arraycopy(this.bits, 0, bits, 0, bits.length);
+            return bits;
+        }
+        return this.bits;
+    }
+
+    /**
      * Resizes this {@code UnsignedInt} to a different bit capacity.
      * @param size the new size.
      * @return an equivalent {@code UnsignedInt} with a different bit array length. Note

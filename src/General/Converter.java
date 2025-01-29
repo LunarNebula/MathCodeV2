@@ -100,4 +100,34 @@ public class Converter {
         }
         return ar;
     }
+
+    /**
+     * Converts a string into an array of {@code booleans}. This method accepts
+     * "1", "T", or "true" as {@code true}, and all other values as {@code false}.
+     * @param s the {@code String}.
+     * @return the array of {@code booleans}.
+     */
+    public static boolean[] convertToBooleanArray(String s) {
+        String[] parse = s.split(",");
+        final boolean[] ar = new boolean[parse.length];
+        for(int i = 0; i < ar.length; i++) {
+            ar[i] = parse[i].equals("1") || parse[i].equals("T") || parse[i].equals("true");
+        }
+        return ar;
+    }
+
+    /**
+     * Converts a string into a 2D array of {@code booleans}. This method accepts
+     * "1", "T", or "true" as {@code true}, and all other values as {@code false}.
+     * @param s the {@code String}.
+     * @return the array of {@code booleans}.
+     */
+    public static boolean[][] convertTo2DBooleanArray(String s) {
+        String[] parse = s.split(";");
+        final boolean[][] ar = new boolean[parse.length][];
+        for(int i = 0; i < ar.length; i++) {
+            ar[i] = convertToBooleanArray(parse[i]);
+        }
+        return ar;
+    }
 }
