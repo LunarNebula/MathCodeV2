@@ -516,4 +516,29 @@ public class Combinatorics {
         }
         return table[c.length][maxWeight];
     }
+
+    /**
+     * Computes a table of Stirling numbers of the first kind.
+     * @param n the first argument.
+     * @param k the second argument.
+     * @param signed  {@code true} if this Stirling number should be signed, else {@code false}.
+     * @return {@code s(i,j)} for all i <= n and j <= k, else {@code c(n,k)}
+     */
+    public static BigInteger[][] stirlingFirstKind(int n, int k, boolean signed) {
+        final BigInteger[][] table = new BigInteger[n+1][k+1];
+        boolean rowStartSign = false;
+        Arrays.fill(table[0], BigInteger.ZERO);
+        table[0][0] = BigInteger.ONE;
+        for(int i = 1; i < table.length; i++) {
+            boolean sign = rowStartSign;
+            table[i][0] = BigInteger.ZERO;
+            for(int j = 1; j < table.length; j++) {
+                table[i][j] = (signed ? BigInteger.valueOf(1 - i) : BigInteger.valueOf(i - 1))
+                        .multiply(table[i - 1][j]).add(table[i - 1][j - 1]);
+                sign = ! sign;
+            }
+            rowStartSign = ! rowStartSign;
+        }
+        return table;
+    }
 }

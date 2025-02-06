@@ -118,6 +118,21 @@ public class Matrix implements TrueTextEncodable {
     }
 
     /**
+     * Generates a new {@code Matrix} from a set of {@code BigInteger} values.
+     * @param e the new elements.
+     */
+    public Matrix(BigInteger[]... e) {
+        final Fraction[][] elements = new Fraction[e.length][];
+        for(int i = 0; i < elements.length; i++) {
+            elements[i] = new Fraction[e[i].length];
+            for(int j = 0; j < elements[i].length; j++) {
+                elements[i][j] = new Fraction(e[i][j]);
+            }
+        }
+        this.e = elements;
+    }
+
+    /**
      * Adds two Matrices
      * @param addend the addend Matrix
      * @return the sum of this Matrix and the addend Matrix
