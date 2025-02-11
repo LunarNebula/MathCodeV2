@@ -215,6 +215,16 @@ public class OrMatrix implements TrueTextEncodable {
     }
 
     /**
+     * Gets a particular element of this {@code OrMatrix}.
+     * @param r the row index.
+     * @param c the column index.
+     * @return {@code this.e[r][c]}
+     */
+    public boolean getBit(int r, int c) {
+        return this.e[r][c];
+    }
+
+    /**
      * Provides the TrueText of this {@code BinaryMatrix}.
      * @return this {@code BinaryMatrix} in a parsable format.
      */

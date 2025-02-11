@@ -1,6 +1,7 @@
 package Theory;
 
 import General.Timer;
+import Research.NCourt.OrMatrix;
 
 /**
  * Handles tests for most algorithms. Unless a change is being made to the general test
@@ -27,5 +28,9 @@ public class Test {
      * @throws Exception if an {@code Exception} occurs in the test.
      */
     public static void test() throws Exception {
+        final int[] initial = new int[]{0b00010010,0b00000100,0b00000001,0b00000001,0b00000000,0b00000000,0b00000000,0b00000000};
+        Research.NCourt.NCourt32.run(initial, 20, 23);
+//        final int[] init = new int[]{2,4,1}, transpose = new int[]{4,1,2};
+//        System.out.println(Research.NCourt.NCourt32.productSum(3, init, transpose, new int[]{1,2,4}));
     }
 }

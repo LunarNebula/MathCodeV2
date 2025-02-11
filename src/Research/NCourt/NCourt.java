@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 public class NCourt {
-    public static void run(OrMatrix initial, OrMatrix mask, int lowerBound) {
+    public static void run(OrMatrix initial, OrMatrix mask, int upperBound, int lowerBound) {
         final int SIZE = mask.e.length;
         final OrMatrix om = new OrMatrix(initial);
         OrMatrix answer = new OrMatrix(0);
         final int[][] rowCols = counters(mask, initial);
         final int[] indices = new int[rowCols[0].length];
         indices[0] = rowCols[0][0] + rowCols[1][0];
-        int max = ((SIZE * (SIZE - 1)) >> 1) + 1;
+        int max = upperBound;
         boolean continueIteration = true;
         while(continueIteration) {
-            if(indices[0] == 26 || (indices[0] < max && indices[0] >= lowerBound)) {
+            if(indices[0] < max && indices[0] >= lowerBound) {
                 Map.Entry<OrMatrix, Boolean> entry = om.multiply(om.addI(), true, true);
                 if(!entry.getValue()) {
                     max = indices[0];
