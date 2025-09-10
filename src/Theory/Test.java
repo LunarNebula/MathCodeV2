@@ -1,6 +1,11 @@
 package Theory;
 
+import Algebra.Fraction;
+import Algebra.Polynomial;
 import General.Timer;
+import Geometry.Point;
+import Geometry.Point2D;
+import Research.RUniform2Color.RUniform2Color;
 
 /**
  * Handles tests for most algorithms. Unless a change is being made to the general test
@@ -27,5 +32,11 @@ public class Test {
      * @throws Exception if an {@code Exception} occurs in the test.
      */
     public static void test() throws Exception {
+        //run();
+        System.out.println(Research.RUniform2Color.RUniform2Color.countSimultaneousTransversals(8));
+    }
+
+    public static void run() {
+        System.out.println(Research.RUniform2Color.RUniform2Color.countPartDisjointSets(5));
     }
 }
