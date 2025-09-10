@@ -2,21 +2,44 @@ package Research.MatrixFactors;
 
 import Algebra.Fraction;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class MatrixFactors {
-    public static List<String> getRoots(int size, int N, int[] elements) {
+    public static List<String> get3Roots(int size, int N, int[] elements) {
         final int[][] matrix = new int[size][];
         fillMatrix(matrix, elements[0]);
         final int LENGTH = size * size;
         final int[] indices = new int[LENGTH];
-        int index = 0;
-        while(index < LENGTH) {
+        Arrays.fill(indices, 1);
+        final Stack<Integer> indexStack = new Stack<>();
+        indexStack.push(0);
+        while(! indexStack.isEmpty()) {
+            int index = indexStack.pop();
         }
         return null;
+    }
+
+    public static boolean isCubeIdentity(int[][] matrix, int len, int N) {
+        for(int i = 0; i < len; i++) {
+            for(int j = 0; j < len; j++) {
+                int element = 0;
+                for(int r1 = 0; r1 < len; r1++) {
+                    int subfactor = 1;
+                    for(int r2 = 0; r2 < len; r2++) {
+                        subfactor *= matrix[r1][r2] * matrix[r2][j];
+                    }
+                    element += subfactor * matrix[i][r1];
+                }
+                if(i == j) {
+                    if(element != N) {
+                        return false;
+                    }
+                } else if(element != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public static void fillMatrix(int[][] matrix, int element) {
